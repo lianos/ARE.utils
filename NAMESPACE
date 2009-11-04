@@ -60,6 +60,7 @@ export(
   # stats
   z.transform,
   z.score,
+  dhist,
   
   # strings
   strip.slashes,

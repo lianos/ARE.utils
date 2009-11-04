@@ -7,5 +7,6 @@ Description: A convenient place to store my utility functions across projects.
     Some code isn't mine and are snippets I've found on the web.
 Depends: caret
 License: BSD (unless otherwise noted)
+URL: http://github.com/lianos/ARE.utils
 LazyLoad: yes
 Date: 2009-08-02
