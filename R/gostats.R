@@ -2,7 +2,6 @@
 # GOstats
 # (Originally extracted from spelunker/medusa.R)
 library(foreach)
-library(doMC)
 library(GOstats)
 
 # org.Hs.eg.db
@@ -15,17 +14,6 @@ do.gostats <- function(gene.sets, universe, conditional=F, p.value=0.01,
   }
   ontology <- match.arg(ontology)
   
-  # if (sfParallel()) {
-  #   cat("|| is on\n")
-  #   sfLibrary(GOstats)
-  #   sfExport('universe', 'conditional', 'ontology')
-  #   my.lapply <- sfLapply
-  # } else {
-  #   cat("|| is off\n")
-  #   my.lapply <- lapply
-  # }
-  my.lapply <- lapply
-  
   do.hyperG <- function(gene.list) {
     params <- new("GOHyperGParams", geneIds=gene.list,
                   universeGeneIds=universe, annotation=annotation,
@@ -37,7 +25,6 @@ do.gostats <- function(gene.sets, universe, conditional=F, p.value=0.01,
   }
   
   if (is.list(gene.sets)) {
-    # my.lapply(gene.sets, do.hyperG)
     GO <- foreach (gset=gene.sets, .packages=c('GOstats')) %dopar% {
       do.hyperG(gset)
     }
