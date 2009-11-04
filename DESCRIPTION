@@ -1,0 +1,11 @@
+Package: ARE.utils
+Title: A library to store random R utility functions
+Version: 0.1.0
+Author: Steve Lianoglou <slianoglou@gmail.com>
+Maintainer: Steve Lianoglou <slianoglou@gmail.com>
+Description: A convenient place to store my utility functions across projects.
+    Some code isn't mine and are snippets I've found on the web.
+Depends: caret
+License: BSD (unless otherwise noted)
+LazyLoad: yes
+Date: 2009-08-02

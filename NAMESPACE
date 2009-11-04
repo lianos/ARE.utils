@@ -1,0 +1,88 @@
+export(
+  # bioformats
+  gff.read,
+  gff.getAttributeField,
+  gtf.read,
+  gtf.getAttributeField,
+  
+  # config
+  rconfig,
+  
+  # datasets
+  trim.data,
+  create.densities,
+  
+  # finance
+  stockHistory,
+  plotStocks,
+  
+  # general
+  dopar,
+  ':=',
+  swap,
+  filter.na,
+  match.dim,
+  dim.names,
+  whos,
+  wideScreen,
+  
+  # glmnet
+  cv.glmnet,
+  plot.cv.error.glmnet,
+  plot.cv.lambda.glmnet,
+  
+  # gostats
+  do.gostats,
+  
+  # learning
+  createFolds,
+  accuracy,
+  
+  # list
+  extractEmbeddedLists,
+  
+  # matrix
+  ind2sub,
+  sub2ind,
+  matrix.power,
+  "%^%",
+  ident,
+  eye,
+  replace.na,
+  
+  # packages
+  installedPackages,
+  reloadPackages,
+  
+  # reports.moin
+  moin.table,
+  
+  # stats
+  z.transform,
+  z.score,
+  
+  # strings
+  strip.slashes,
+  strip.whitespace,
+  
+  # test
+  almost.equal,
+  '%~%',
+  upper.tri.equal,
+  
+  # vector
+  trimVectors,
+  padVectors,
+  createMap,
+  
+  # visuals
+  palette.two.color,
+  palette.two.colorRamp,
+  palette.three.color,
+  palette.gr.marray,
+  my.image.matrix,
+  plot.densities,
+  add.error.bars,
+  calendarHeat
+
+)

@@ -1,0 +1,342 @@
+"
+Generic glmnet code for doing cross validation.
+"
+
+plot.cv.lambda.glmnet <- function(lambda.mean, lambda.error, plot.se=TRUE,
+                                  plot.title='') {
+  errs <- add.error.bars(seq(lambda.mean), lambda.mean, lambda.error, plot.it=FALSE)
+  err.range <- range(unlist(errs), na.rm=TRUE)
+  plot(seq(lambda.mean), lambda.mean, type='b', 
+       main=paste("glmnet: Lambda values over folds", plot.title, sep='\n'),
+       ylim=c(floor(err.range[1]), err.range[2]),
+       pch=19)
+  if (plot.se) {
+    add.error.bars(seq(lambda.mean), upper=errs$upper, lower=errs$lower)
+  }
+}
+
+plot.cv.error.glmnet <- function(lambda.mean, MSE, cv.error, plot.se=TRUE,
+                                 plot.title='') {
+  ## Plot the error around a fixed set of lambdas
+  ## MSE = mean of mean squared error over all folds per value of lambda
+  errs <- add.error.bars(lambda.mean, MSE, cv.error, plot.it=FALSE)
+  err.range <- range(unlist(errs))
+  cols <- colorRampPalette(c('black','red'))(length(lambda.mean))
+  plot(lambda.mean, MSE, ylim=c(floor(err.range[1]), err.range[2]),
+       main=paste("glmnet: CV Error", plot.title, sep='\n'),
+       col=cols, pch=19, type='b')
+  if (plot.se) {
+    add.error.bars(lambda.mean, lower=errs$lower, upper=errs$upper, col=cols)
+  }
+  min.error.idx <- which.min(MSE)
+  min.error <- MSE[min.error.idx]
+  text(par()$usr[2], min.error-0.1, as.character(min.error))
+  abline(h=min.error, col='red', lty='dashed')
+}
+
+cv.glmnet <- function(X, Y, alpha=1, K=10, all.folds=NULL, nlambda=100,
+                      eval.by=c('mse', 'r2', 'spearman'),
+                      verbose=TRUE,  do.plot=FALSE, plot.se=TRUE,
+                      plot.lambda=FALSE, multiplot=TRUE,
+                      plot.title=NULL, compressed=TRUE) {
+  # A super-cross-validation wrapper, inspired by lars::cv.lars
+  # 
+  # Parameters
+  # ----------
+  # X          : The feature matrix (rows are obversations, cols are features)
+  # Y          : Target/output vector
+  # alpha      : The alpha value in glment
+  #              lasso   : alpha=1
+  #              ridge   : alpha=0
+  #              elastic : 0 < alpha < 1
+  # K          : Number of CV folds
+  # all.folds  : a list of indices to holdout in each fold (use of K and this is
+  #              mutually exclusive)
+  # nlambda    : Number of lambda values to compute the regularization path over.
+  #              Defaults to 100.
+  # do.plot    : Plots the MSE over the values of lambda along the
+  #              regularization path. If this is set to FALSE, no plots are 
+  #              drawn, no matter the setting of other plot.* arguments.
+  # plot.se    : Plots the standard error of MSE (calc'd from the folds)
+  # plot.lambda: Plots the lambdas used in the regularization path, too.
+  # compressed : Compresses the error/sd/etc. results to be their mean over folds 
+  #              instead of returning a matrix for the value of these things at
+  #              each ovservation.
+  # 
+  # Returns
+  # -------
+  #   model       : glmnet trained over all of the data
+  #   cv          : (K x nlambda) matrix with MSE for each value of lambda
+  #               : lambda values are set in colnames(cv)
+  #   cv.error    : nlambda-length vector of SEMs CV error at each lambda
+  #   models      : list(K) of model trained at fold
+  #   coefs       : list(K) of coefs extracted using best lambda for the fold
+  #   best.lambda : list(K) optimal lambda value in fold
+  #   lambda.mean : vector(K) of avg. lambda-regularization path
+  #   all.folds   : list(K) of examples held out per fold
+  # 
+  # Usage
+  # -----
+  # cv.result <- cv.glmnet(X,Y)
+  # 
+  # Notes
+  # -----
+  # The lambdas used in each fold can be slightly different, perhaps it's good
+  # to specify the lambdas after all folds are finished to plot something similar
+  # to the cv.lars function
+  # 
+  # Results from glment
+  #   $beta    : matrix of coeficiens
+  #   $dim     : dimension of coefficient matrix
+  #   $lambda  : sequence of lambda values used
+  #   $df      : # of nonzero coefs for each lambda
+  #   $dev     : fraction of (null) deviance explained (for "elnet", this is the R-square)
+  # 
+  # glmnet::predict returns a matrix of predictions over all values of lambda
+  
+  if (do.plot && plot.lambda && multiplot) {
+    opar <- par(mfrow=c(1,2))
+    on.exit(par(opar))
+  }
+  
+  if (is.null(all.folds)) {
+    all.folds <- caret::createFolds(Y, K)
+  } else {
+    K <- length(all.folds)
+  }
+  
+<<<<<<< .mine
+  models <- list()
+  for (i in seq(all.folds)) {
+    omit <- all.folds[[i]]
+    models[[i]] <- glmnet(X[-omit, , drop=FALSE], Y[-omit], alpha=alpha, nlambda=nlambda)
+  }
+  
+  # browser()
+  
+  ## Sometimes there are less lambdas then we expect due to numerical issues(?)
+  ## as algo reaches end of regularization path. We need to find the minimum length
+  ## lambda vector and chop all accordingly.
+  ##
+  ## (Or do you want to pad out the NA's? -- there were problems before with that)
+  ## 
+  ## ?glmnet:
+  ##    Sometimes the sequence is truncated before nlambda values of lambda have
+  ##    been used, because of instabilities in the logistic or multinomial models
+  ##    near a saturated fit
+  lambdas <- lapply(models, '[[', 'lambda')
+  cut.at <- min(sapply(lambdas, function(l) {
+    nas <- which(is.na(l))
+    if (length(nas) == 0) {
+      length(l)
+    } else {
+      nas[1]
+=======
+  eval.by <- match.arg(eval.by)
+  if (eval.by == 'mse') {
+    score <- function(preds, Y) {
+      rse <- (preds - Y)^2
+      colMeans(rse)
+>>>>>>> .r45
+    }
+    best <- min
+    which.best <- which.min
+  } else if (eval.by == 'r2') {
+    score <- function(preds, Y) {
+      rse <- (preds - Y)^2
+      1 - colSums(rse) / sum((Y - mean(Y))^2)
+    }
+    best <- max
+    which.best <- which.max
+  } else if (eval.by == 'spearman') {
+    score <- function(preds, Y) {
+      apply(preds, 2, function(col) {
+        cor.test(col, Y, method='spearman')$estimate
+      })
+    }
+    best <- max
+    which.best <- which.max
+  }
+  
+  models <- list()
+  all.scores <- list()
+  best.scores <- numeric(length(all.folds))
+  best.lambdas <- numeric(length(all.folds))
+  
+  for (i in seq(all.folds)) {
+    omit <- all.folds[[i]]
+    model <- glmnet(X[-omit, , drop=FALSE], Y[-omit], alpha=alpha)
+    preds <- predict(model, X[omit, , drop=FALSE])
+    escore <- score(preds, Y[omit])
+    best.scores[i] <- best(escore)
+    best.lambdas[i] <- model$lambda[which.best(escore)]
+    
+    ## do regenerate the plot methods
+    all.scores[[i]] <- escore
+    models[[i]] <- model
+  }
+  
+  ## TODO: Show eval.metric plot per lambda
+  ## TODO: Show lambda path (?) 
+  
+  retval <- list(eval.by=eval.by, best.lambdas=best.lambdas, scores=scores)
+  class(retval) <- c('cv.glmnet', 'list')
+  invisible(retval)
+}
+
+
+# cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
+#                       verbose=TRUE,  do.plot=TRUE, plot.se=TRUE,
+#                       plot.lambda=FALSE, multiplot=TRUE,
+#                       plot.title=NULL, compressed=TRUE) {
+#   # A super-cross-validation wrapper, inspired by lars::cv.lars
+#   # 
+#   # Parameters
+#   # ----------
+#   # X          : The feature matrix (rows are obversations, cols are features)
+#   # Y          : Target/output vector
+#   # alpha      : The alpha value in glment
+#   #              lasso   : alpha=1
+#   #              ridge   : alpha=0
+#   #              elastic : 0 < alpha < 1
+#   # K          : Number of CV folds
+#   # all.folds  : a list of indices to holdout in each fold (use of K and this is
+#   #              mutually exclusive)
+#   # nlambda    : Number of lambda values to compute the regularization path over.
+#   #              Defaults to 100.
+#   # do.plot    : Plots the MSE over the values of lambda along the
+#   #              regularization path. If this is set to FALSE, no plots are 
+#   #              drawn, no matter the setting of other plot.* arguments.
+#   # plot.se    : Plots the standard error of MSE (calc'd from the folds)
+#   # plot.lambda: Plots the lambdas used in the regularization path, too.
+#   # compressed : Compresses the error/sd/etc. results to be their mean over folds 
+#   #              instead of returning a matrix for the value of these things at
+#   #              each ovservation.
+#   # 
+#   # Returns
+#   # -------
+#   #   model       : glmnet trained over all of the data
+#   #   cv          : (K x nlambda) matrix with MSE for each value of lambda
+#   #               : lambda values are set in colnames(cv)
+#   #   cv.error    : nlambda-length vector of SEMs CV error at each lambda
+#   #   models      : list(K) of model trained at fold
+#   #   coefs       : list(K) of coefs extracted using best lambda for the fold
+#   #   best.lambda : list(K) optimal lambda value in fold
+#   #   lambda.mean : vector(K) of avg. lambda-regularization path
+#   #   all.folds   : list(K) of examples held out per fold
+#   # 
+#   # Usage
+#   # -----
+#   # cv.result <- cv.glmnet(X,Y)
+#   # 
+#   # Notes
+#   # -----
+#   # The lambdas used in each fold can be slightly different, perhaps it's good
+#   # to specify the lambdas after all folds are finished to plot something similar
+#   # to the cv.lars function
+#   # 
+#   # Results from glment
+#   #   $beta    : matrix of coeficiens
+#   #   $dim     : dimension of coefficient matrix
+#   #   $lambda  : sequence of lambda values used
+#   #   $df      : # of nonzero coefs for each lambda
+#   #   $dev     : fraction of (null) deviance explained (for "elnet", this is the R-square)
+#   # 
+#   # glmnet::predict returns a matrix of predictions over all values of lambda
+#   
+#   if (do.plot && plot.lambda && multiplot) {
+#     opar <- par(mfrow=c(1,2))
+#     on.exit(par(opar))
+#   }
+#   
+#   if (is.null(all.folds)) {
+#     all.folds <- caret::createFolds(Y, K)
+#   } else {
+#     K <- length(all.folds)
+#   }
+#   
+#   models <- list()
+#   for (i in seq(all.folds)) {
+#     omit <- all.folds[[i]]
+#     models[[i]] <- glmnet(X[-omit, , drop=FALSE], Y[-omit], alpha=alpha)
+#   }
+#   
+#   ## Sometimes there are less lambdas then we expect due to numerical issues(?)
+#   ## as algo reaches end of regularization path. We need to find the minimum length
+#   ## lambda vector and chop all accordingly.
+#   ##
+#   ## (Or do you want to pad out the NA's? -- there were problems before with that)
+#   ## 
+#   ## ?glmnet:
+#   ##    Sometimes the sequence is truncated before nlambda values of lambda have
+#   ##    been used, because of instabilities in the logistic or multinomial models
+#   ##    near a saturated fit
+#   lambdas <- lapply(models, '[[', 'lambda')
+#   cut.at <- min(sapply(lambdas, function(l) {
+#     nas <- which(is.na(l))
+#     if (length(nas) == 0) {
+#       length(l)
+#     } else {
+#       nas[1]
+#     }
+#   }))
+#   lambdas <- lapply(lambdas, function(l) l[1:cut.at])
+#   if (cut.at != nlambda) {
+#     if (verbose)
+#       cat("   WARNING: Had to cut lambda positions to", cut.at, "\n")
+#     nlambda <- cut.at
+#   }
+#     
+#   ## Stack the lambdas used per fold in each row of a (K x nlambda) matrix
+#   lambda.stack <- do.call(rbind, lambdas)
+#   lambda.mean <- colMeans(lambda.stack, na.rm=TRUE)
+#   lambda.err <- sqrt(apply(lambda.stack, 2, var, na.rm=TRUE) / K)
+#   
+#   if (do.plot && plot.lambda) {
+#     plot.cv.lambda.glmnet(lambda.mean, lambda.err, plot.se=plot.se,
+#                           plot.title=plot.title)
+#   }
+#   
+#   ## Calculate error at avg'd lambda points along regularization path over
+#   # folds
+#   dim.names <- list(paste("fold", 1:K),as.character(lambda.mean))
+#   cv <- matrix(0, K, nlambda, dimnames=dim.names)
+#   dev <- cv
+#   r2 <- cv
+#   
+#   for (i in seq(all.folds)) {
+#     ## Calculate MSE error over heldout data
+#     omit <- all.folds[[i]]
+#     p <- predict(models[[i]], X[omit, , drop=FALSE], s=lambda.mean)
+#     rse <- apply(p, 2, '-', Y[omit])^2
+#     mse <- colMeans(rse)
+#     cv[i,] <- mse # mean squared error per lambda
+#     r2[i,] <- 1 - colSums(rse) / sum((Y[omit] - mean(Y[omit]))^2)
+#   }
+#   
+#   cv.error <- sqrt(apply(cv, 2, var) / K) # SEM = var / sqrt(n.observation of mean)
+#   dev.error <- sqrt(apply(dev, 2, var) / K)
+#   r2.error <- sqrt(apply(r2, 2, var) / K)
+#   
+#   if (do.plot) {
+#     if (plot.lambda && !multiplot) {
+#       dev.new()
+#     }
+#     plot.cv.error.glmnet(lambda.mean, colMeans(cv), cv.error, plot.se=plot.se,
+#                          plot.title=plot.title)
+#   }
+#   
+#   if (compressed) {
+#     cv <- colMeans(cv)
+#     dev <- colMeans(dev)
+#     r2 <- colMeans(r2)
+#   }
+#   
+#   ## TODO: model shouldn't be returned here, but I need it and can't deal with
+#   ##       design right now (2009-07-23)
+#   retval <- list(model=glmnet(X, Y, alpha=alpha), lambda.mean=lambda.mean,
+#                  cv=cv, cv.error=cv.error, dev=dev, dev.error=dev.error,
+#                  r2=r2, r2.error=r2.error, compressed=compressed)
+#   class(retval) <- c('cv.glmnet', 'list')
+#   invisible(retval)
+# }

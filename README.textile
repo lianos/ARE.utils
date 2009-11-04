@@ -1,0 +1,4 @@
+h1. ARE.utils
+
+This library holds utility functions that are developed for various projects, but aren't tied to the specifics of any one project. If I find that I'm using a function in more than one project, it'll probably make its way in here.
+
