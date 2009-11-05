@@ -39,12 +39,12 @@ initTestEnvironment <- function(test.index=NULL) {
   if (is.null(test.index)) {
     test.index <- get('.TEST.INDEX', envir=envir)
   }
-  tc <- get('TEST.COUNT', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
-  tf <- get('TEST.FAIL', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
-  tc[[test.index]] <- 0
-  tf[[test.index]] <- 0
-  assign('TEST.COUNT', tc, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
-  assign('TEST.FAIL', tf, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  tcount <- get('TEST.COUNT', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  tfail <- get('TEST.FAIL', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  tcount[[test.index]] <- 0
+  tfail[[test.index]] <- 0
+  assign('TEST.COUNT', tcount, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  assign('TEST.FAIL', tfail, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
 }
 
 doTest <- function(expr, test.index=NULL, name=NULL, verbose=TRUE) {
@@ -59,9 +59,9 @@ doTest <- function(expr, test.index=NULL, name=NULL, verbose=TRUE) {
   eval(expr, envir=envir)
   # .TEST.COUNT[[test.index]] <<- .TEST.COUNT[[test.index]] + 1
   # eval(TEST.COUNT[[test.index]] <- TEST.COUNT[[test.index]] + 1, envir=.TEST.ENV)
-  tc <- get('TEST.COUNT', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
-  tc[[test.index]] <- tc[[test.index]] + 1
-  assign('TEST.COUNT', tc, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  tcount <- get('TEST.COUNT', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  tcount[[test.index]] <- tcount[[test.index]] + 1
+  assign('TEST.COUNT', tcount, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
 }
 
 fail <- function(msg, var.name=NULL, envir=NULL) {
@@ -75,14 +75,14 @@ fail <- function(msg, var.name=NULL, envir=NULL) {
     var.name <- get('.TEST.INDEX', envir=envir)
   }
   # .TEST.STATUS[[var.name]] <<- .TEST.STATUS[[var.name]] + 1
-  tf <- get('TEST.FAIL', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
-  tf[[var.name]] <- tf[[var.name]] + 1
-  assign('TEST.FAIL', ts, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  tfail <- get('TEST.FAIL', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  tfail[[var.name]] <- tfail[[var.name]] + 1
+  assign('TEST.FAIL', tfail, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
 }
 
 failReport <- function(var.name) {
-  tf <- get('TEST.FAIL', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
-  cat("  Total Errors for", var.name, ':', tf[[var.name]], "\n")
+  tfail <- get('TEST.FAIL', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  cat("  Total Errors for", var.name, ':', tfail[[var.name]], "\n")
 }
 
 testReport <- function(var.name=NULL) {
@@ -90,12 +90,12 @@ testReport <- function(var.name=NULL) {
   if (is.null(var.name)) {
     var.name <- get('.TEST.INDEX', envir=envir)
   }
-  tc <- get('TEST.COUNT', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  tcount <- get('TEST.COUNT', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
   cat("\n\n")
   cat("====================================================\n")
   cat("Test Report for:", var.name, "\n")
   cat("====================================================\n")
-  cat("  Total tests for", var.name, ':', tc[[var.name]], "\n")
+  cat("  Total tests for", var.name, ':', tcount[[var.name]], "\n")
   failReport(var.name)
 }
 
