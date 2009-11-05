@@ -55,7 +55,7 @@ doTest <- function(expr, name=NULL, test.index=NULL, verbose=TRUE) {
     test.index <- get('.TEST.INDEX', envir=envir)
   }
   if (verbose && !is.null(name)) {
-    cat("=== Testing:", name, "===\n")
+    cat("== Testing:", name, "\n")
   }
   
   eval(expr, envir=envir)
@@ -67,7 +67,7 @@ doTest <- function(expr, name=NULL, test.index=NULL, verbose=TRUE) {
 }
 
 fail <- function(msg, var.name=NULL, envir=NULL) {
-  cat("    FAIL:", msg, '\n')
+  cat("   FAIL:", msg, '\n')
   # env <- globalenv()
   # assign(var.name, get(var.name, envir=env) + 1, envir=env)
   if (is.null(var.name)) {
@@ -84,7 +84,7 @@ fail <- function(msg, var.name=NULL, envir=NULL) {
 
 failReport <- function(var.name) {
   tfail <- get('TEST.FAIL', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
-  cat("  Total Errors for", var.name, ':', tfail[[var.name]], "\n")
+  cat("  Total tests FAILED for", var.name, ':', tfail[[var.name]], "\n")
 }
 
 testReport <- function(var.name=NULL) {
@@ -97,7 +97,7 @@ testReport <- function(var.name=NULL) {
   cat("====================================================\n")
   cat("Test Report for:", var.name, "\n")
   cat("----------------------------------------------------\n")
-  cat("  Total tests for", var.name, ':', tcount[[var.name]], "\n")
+  cat("  Total tests RUN for", var.name, ':', tcount[[var.name]], "\n")
   failReport(var.name)
   cat("====================================================\n")
 }
