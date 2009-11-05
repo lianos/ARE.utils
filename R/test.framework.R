@@ -12,7 +12,10 @@ the test. If tests are run serially, then only one test file will have control
 of the .TEST.INDEX and you can ignore passing this value into the doTest and
 fail functions in your testing code.
 
-Example: Testing some graph implementation [graph.test.R]
+Example
+-------
+
+graph.test.R [testing file]::
 
     .TEST.INDEX <- 'graph.test'
     initTestEnvironment(.TEST.INDEX)
@@ -20,13 +23,25 @@ Example: Testing some graph implementation [graph.test.R]
     conn <- get.connected.test.graph(mode='undirected', weighted=TRUE)
     conn.w1 <- set.edge.attribute(conn, 'weight', value=1)
     
-    doTest({
+    doTest(name='Weighted Degree', {
       if (!all(degree(conn) == degree.weighted(conn.w1))) {
         fail('Weighted degree calcuation failed.')
       }
     })
     
     testReport()
+  
+Running graph.test.R::
+  
+    == Testing: Weighted Degree 
+    
+    ====================================================
+    Test Report for: graph.test 
+    ----------------------------------------------------
+      Total tests RUN for graph.test : 1 
+      Total tests FAILED for graph.test : 0 
+    ====================================================
+    
 "
 
 if (!exists('.ARE.TEST.ENV')) {
