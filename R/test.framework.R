@@ -1,5 +1,7 @@
 "
-=== A Poorman's Testing Framework ===
+A Poorman's Testing Framework
+-----------------------------
+
 [Note to self: You should learn how to use a 'real' R testing framework]
 
 Create a  tests/ subdirectory in your project's R directory and have 1 test
@@ -47,13 +49,13 @@ initTestEnvironment <- function(test.index=NULL) {
   assign('TEST.FAIL', tfail, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
 }
 
-doTest <- function(expr, test.index=NULL, name=NULL, verbose=TRUE) {
+doTest <- function(expr, name=NULL, test.index=NULL, verbose=TRUE) {
   envir <- parent.frame()
   if (is.null(test.index)) {
     test.index <- get('.TEST.INDEX', envir=envir)
   }
   if (verbose && !is.null(name)) {
-    cat("  Testing:", name, "\n")
+    cat("=== Testing:", name, "===\n")
   }
   
   eval(expr, envir=envir)
@@ -91,21 +93,21 @@ testReport <- function(var.name=NULL) {
     var.name <- get('.TEST.INDEX', envir=envir)
   }
   tcount <- get('TEST.COUNT', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
-  cat("\n\n")
+  cat("\n")
   cat("====================================================\n")
   cat("Test Report for:", var.name, "\n")
-  cat("====================================================\n")
+  cat("----------------------------------------------------\n")
   cat("  Total tests for", var.name, ':', tcount[[var.name]], "\n")
   failReport(var.name)
+  cat("====================================================\n")
 }
 
-runAllTests <- function(path='.') {
-  test.files <- list.files(path, pattern="ztest\\..+\\.R", full.names=T)
+runAllTests <- function(path='tests') {
+  test.files <- list.files(path, pattern=glob2rx("*.test.R"), full.names=TRUE)
   for (file in test.files) {
     cat("Running test file:", basename(file), "\n")
     source(file)
     cat("\n")
   }
 }
-
 
