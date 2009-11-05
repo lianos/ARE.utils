@@ -71,6 +71,14 @@ export(
   '%~%',
   upper.tri.equal,
   
+  # test.framework
+  initTestEnvironment,
+  doTest,
+  fail,
+  failReport,
+  testReport,
+  runAllTests,
+  
   # vector
   trimVectors,
   padVectors,

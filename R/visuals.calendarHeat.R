@@ -63,7 +63,7 @@ r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384")   #red to green
 w2b <- c("#045A8D", "#2B8CBE", "#74A9CF", "#BDC9E1", "#F1EEF6")   #white to blue
             
 assign("col.sty", get(color))
-calendar.pal <- colorRampPalette((col.sty), space = "Lab")
+calendar.pal <- grDevices::colorRampPalette((col.sty), space = "Lab")
 def.theme <- lattice.getOption("default.theme")
 cal.theme <-
    function() {  

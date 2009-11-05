@@ -51,7 +51,7 @@ plot.cv.error.glmnet <- function(lambdas, eval.metric, plot.se=TRUE,
   errs <- add.error.bars(lambda$mean, eval.mean, eval.error, plot.it=FALSE)
   err.range <- range(unlist(errs), na.rm=TRUE)
   
-  cols <- colorRampPalette(c('black','red'))(length(lambda$mean))
+  cols <- grDevices::colorRampPalette(c('black','red'))(length(lambda$mean))
   plot(lambda$mean, eval.mean, ylim=c(floor(err.range[1]), err.range[2]),
        main=paste("glmnet: CV Error", plot.title, sep='\n'),
        col=cols, pch=19, type='b')

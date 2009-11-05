@@ -16,3 +16,4 @@ upper.tri.equal <- function(M1, M2, tolerance=.Machine$double.eps^0.5) {
          && all(almost.equal(M1[upper.tri(M1)], M2[upper.tri(M2)], tolerance=tolerance)))
 }
 
+
