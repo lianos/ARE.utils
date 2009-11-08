@@ -117,9 +117,15 @@ testReport <- function(var.name=NULL) {
   cat("====================================================\n")
 }
 
-runAllTests <- function(path='tests') {
-  test.files <- list.files(path, pattern=glob2rx("*.test.R"), full.names=TRUE)
+runAllTests <- function(..., path='tests') {
+  args <- list(...)
+  if (length(args) > 0) {
+    test.files <- paste(path, unlist(args), sep="/")
+  } else {
+    test.files <- list.files(path, pattern=glob2rx("*.test.R"), full.names=TRUE)
+  }
   for (file in test.files) {
+    cat("//////////////////////////////////////////////////\n")
     cat("Running test file:", basename(file), "\n")
     source(file)
     cat("\n")
