@@ -1,7 +1,12 @@
-palette.two.color <- grDevices::colorRampPalette(c('black','red'))(2)
-palette.two.colorRamp <- grDevices::colorRampPalette(c('black','red'))(256)
-palette.three.color <- grDevices::colorRampPalette(c('green', 'black','red'))(3)
-palette.gr.marray <- grDevices::colorRampPalette(c('green', 'black', 'red'))(256)
+# palette.two.color <- grDevices::colorRampPalette(c('black','red'))(2)
+# palette.two.colorRamp <- grDevices::colorRampPalette(c('black','red'))(256)
+# palette.three.color <- grDevices::colorRampPalette(c('green', 'black','red'))(3)
+# palette.gr.marray <- grDevices::colorRampPalette(c('green', 'black', 'red'))(256)
+
+palette.two.color <- gplots::colorpanel(2, low='black', high='red')
+palette.two.colorRamp <- gplots::colorpanel(256, low='black', high='red')
+palette.three.color <- gplots::greenred(3)
+palette.gr.marray <- gplots::greenred(255)
 
 my.image.matrix <- function(m, ...) {
   # Plotting matrices as images is weird ...

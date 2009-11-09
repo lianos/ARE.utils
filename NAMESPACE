@@ -58,6 +58,10 @@ export(
   moin.table,
   
   # stats
+  evalMse,
+  evalR2,
+  evalSpearman,
+  regressionPerformance,
   z.transform,
   z.score,
   dhist,
@@ -75,9 +79,8 @@ export(
   initTestEnvironment,
   doTest,
   fail,
-  failReport,
   testReport,
-  runAllTests,
+  runTests,
   
   # vector
   trimVectors,
