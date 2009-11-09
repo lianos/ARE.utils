@@ -66,55 +66,6 @@ plot.cv.error.glmnet <- function(lambdas, eval.metric, plot.se=TRUE,
   }
 }
 
-###############################################################################
-# Model evaulation functions for cv.glmenet
-###############################################################################
-
-.mse <- function(predicted, Y) {
-  if (!is.matrix(predicted)) {
-    predicted <- matrix(predicted, ncol=1)
-  }
-  stopifnot(nrow(predicted) == length(Y))
-  colMeans((predicted - Y)^2)
-}
-
-.r2 <- function(predicted, Y) {
-  ## http://en.wikipedia.org/wiki/Coefficient_of_determination
-  ## R2 "as explained variance" := 1 - SSerr / SStot
-  ## 
-  ## compares the explained variance (variance of the model's predictions)
-  ## with the total variance (of the data)
-  ##
-  ## NOTE: This formulation matches exactly with glmnet()$dev when used
-  ##       calculated on training data and preds on the data model was
-  ##       trained on
-  ## TODO: This gives negative values for R2 on held out data! 
-  if (!is.matrix(predicted)) {
-    predicted <- matrix(predicted, ncol=1)
-  }
-  stopifnot(nrow(predicted) == length(Y))
-  ss.err <- colSums((predicted - Y)^2)
-  ss.tot <- sum((Y - mean(Y))^2)
-  1 - (ss.err / ss.tot)
-}
-
-.spearman <- function(predicted, Y) {
-  if (!is.matrix(predicted)) {
-    predicted <- matrix(predicted, ncol=1)
-  }
-  stopifnot(nrow(predicted) == length(Y))
-  if (sd(Y) == 0) {
-    stop("Standard deviation of target variables are 0 : screws the spearman test")
-  }
-  apply(predicted, 2, function(col) {
-    if (sd(col) == 0) {
-      NA
-    } else {
-      cor.test(col, Y, method='spearman')$estimate
-    }
-  })
-}
-
 cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
                       standardize=TRUE, eval.by=c('mse', 'r2', 'spearman'),
                       verbose=TRUE,  do.plot=FALSE, plot.se=TRUE,
@@ -185,21 +136,7 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
   
   ## Determine metric to evaluate model by
   eval.by <- match.arg(eval.by)
-  if (eval.by == 'mse') {
-    ## Evaluate by Mean Squared Error
-    evalF <- .mse
-    best <- min
-    which.best <- which.min
-  } else if (eval.by == 'r2') {
-    ## Evalute by fraction of explained varaiance
-    evalF <- .r2
-    best <- max
-    which.best <- which.max
-  } else if (eval.by == 'spearman') {
-    evalF <- .spearman
-    best <- max
-    which.best <- which.max
-  }
+  perf <- regressionPerformance(eval.by)
   
   all.scores <- list() # Vectors per fold holding the mse/r2/etc per lambda
   all.lambdas <- list()
@@ -211,10 +148,10 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
     model <- glmnet(X[-omit, , drop=FALSE], Y[-omit], alpha=alpha,
                     standardize=standardize)
     preds <- predict(model, X[omit, , drop=FALSE])
-    escore <- evalF(preds, Y[omit])
+    escore <- perf$eval(preds, Y[omit])
     
-    best.scores[i] <- best(escore)
-    best.lambdas[i] <- model$lambda[which.best(escore)]
+    best.scores[i] <- perf$best(escore)
+    best.lambdas[i] <- model$lambda[perf$which.best(escore)]
     
     ## to regenerate the plot methods
     all.scores[[i]] <- escore

@@ -97,27 +97,33 @@ fail <- function(msg, var.name=NULL, envir=NULL) {
   assign('TEST.FAIL', tfail, envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
 }
 
-failReport <- function(var.name) {
-  tfail <- get('TEST.FAIL', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
-  cat("  Total tests FAILED for", var.name, ':', tfail[[var.name]], "\n")
-}
-
 testReport <- function(var.name=NULL) {
   envir <- parent.frame()
   if (is.null(var.name)) {
     var.name <- get('.TEST.INDEX', envir=envir)
   }
+  
   tcount <- get('TEST.COUNT', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  tfail <- get('TEST.FAIL', envir=getAnywhere('.ARE.TEST.ENV')$objs[[1]])
+  
   cat("\n")
-  cat("====================================================\n")
-  cat("Test Report for:", var.name, "\n")
-  cat("----------------------------------------------------\n")
-  cat("  Total tests RUN for", var.name, ':', tcount[[var.name]], "\n")
-  failReport(var.name)
-  cat("====================================================\n")
+  
+  if (tolower(var.name) != 'all') {
+    cat("====================================================\n")
+    cat("Test Report for:", var.name, "\n")
+    cat("----------------------------------------------------\n")
+    cat("  Total tests RUN for", var.name, '   :', tcount[[var.name]], "\n")
+    cat("  Total tests FAILED for", var.name, ':', tfail[[var.name]], "\n\n")
+  } else {
+    cat("||||||||||||||||||||||||||||||||||||||||||||||||||||\n")
+    cat("||               Final Test Report                ||\n")
+    cat("||||||||||||||||||||||||||||||||||||||||||||||||||||\n\n")
+    cat("Total Tests Run    :", sum(unlist(tcount)), "\n")
+    cat("Total Tests Failed :", sum(unlist(tfail)), "\n")
+  }
 }
 
-runAllTests <- function(..., path='tests') {
+runTests <- function(..., path='tests') {
   args <- list(...)
   if (length(args) > 0) {
     test.files <- paste(path, unlist(args), sep="/")
@@ -125,10 +131,13 @@ runAllTests <- function(..., path='tests') {
     test.files <- list.files(path, pattern=glob2rx("*.test.R"), full.names=TRUE)
   }
   for (file in test.files) {
-    cat("//////////////////////////////////////////////////\n")
-    cat("Running test file:", basename(file), "\n")
+    cat("/////////////////////////////////////////// ")
+    cat("Test File:", basename(file), "\n")
     source(file)
     cat("\n")
+  }
+  if (length(test.files) > 1) {
+    testReport('all')
   }
 }
 
