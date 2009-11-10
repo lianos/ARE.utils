@@ -1,7 +1,7 @@
 # Taken from gplots::heatmap.2 version 2.7.3
 ## $Id: heatmap.2.R 1364 2009-10-22 20:53:11Z warnes $
 
-heatmap.2 <- function (x,
+heatmap.22 <- function (x,
 
                        ## dendrogram control
                        Rowv = TRUE,

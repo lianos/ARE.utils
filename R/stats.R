@@ -11,23 +11,34 @@ evalMse <- function(predicted, Y) {
   if (!is.matrix(predicted)) {
     predicted <- matrix(predicted, ncol=1)
   }
+  if (!is.vector(Y)) {
+    Y <- as.vector(Y)
+  }
   stopifnot(nrow(predicted) == length(Y))
   colMeans((predicted - Y)^2)
 }
 
 evalR2 <- function(predicted, Y) {
-  ## http://en.wikipedia.org/wiki/Coefficient_of_determination
-  ## R2 "as explained variance" := 1 - SSerr / SStot
-  ## 
-  ## compares the explained variance (variance of the model's predictions)
-  ## with the total variance (of the data)
-  ##
-  ## NOTE: This formulation matches exactly with glmnet()$dev when used
-  ##       calculated on training data and preds on the data model was
-  ##       trained on
-  ## TODO: This gives negative values for R2 on held out data! 
+  # http://en.wikipedia.org/wiki/Coefficient_of_determination
+  # R2 "as explained variance" := 1 - SSerr / SStot
+  # 
+  #    SSerr = Residual sum of squares
+  #            \sum_i (y_i - f_i)^2
+  #    SStot = Total sum of squares (proportinal to sample variance)
+  #            \sum_i (y_i - mean(y))^2
+  #
+  # compares the explained variance (variance of the model's predictions)
+  # with the total variance (of the data)
+  #
+  # NOTE: This formulation matches exactly with glmnet()$dev when used
+  #       calculated on training data and preds on the data model was
+  #       trained on
+  # TODO: This gives negative values for R2 on held out data! 
   if (!is.matrix(predicted)) {
     predicted <- matrix(predicted, ncol=1)
+  }
+  if (!is.vector(Y)) {
+    Y <- as.vector(Y)
   }
   stopifnot(nrow(predicted) == length(Y))
   ss.err <- colSums((predicted - Y)^2)
@@ -38,6 +49,9 @@ evalR2 <- function(predicted, Y) {
 evalSpearman <- function(predicted, Y) {
   if (!is.matrix(predicted)) {
     predicted <- matrix(predicted, ncol=1)
+  }
+  if (!is.vector(Y)) {
+    Y <- as.vector(Y)
   }
   stopifnot(nrow(predicted) == length(Y))
   if (sd(Y) == 0) {

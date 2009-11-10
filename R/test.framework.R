@@ -115,11 +115,16 @@ testReport <- function(var.name=NULL) {
     cat("  Total tests RUN for", var.name, '   :', tcount[[var.name]], "\n")
     cat("  Total tests FAILED for", var.name, ':', tfail[[var.name]], "\n\n")
   } else {
+    tests.run <- sum(unlist(tcount))
+    tests.fail <- sum(unlist(tfail))
     cat("||||||||||||||||||||||||||||||||||||||||||||||||||||\n")
     cat("||               Final Test Report                ||\n")
-    cat("||||||||||||||||||||||||||||||||||||||||||||||||||||\n\n")
-    cat("Total Tests Run    :", sum(unlist(tcount)), "\n")
-    cat("Total Tests Failed :", sum(unlist(tfail)), "\n")
+    cat("|| ---------------------------------------------- ||\n")
+    cat("||                                                ||\n")
+    cat(format(sprintf("|| Total Tests Run    : %d", tests.run), width=50), "||\n", sep="")
+    cat(format(sprintf("|| Total Tests Failed : %d", tests.fail), width=50),"||\n", sep="")
+    cat("||                                                ||\n")
+    cat("||||||||||||||||||||||||||||||||||||||||||||||||||||\n")
   }
 }
 
