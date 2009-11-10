@@ -171,9 +171,11 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
                          plot.title=paste(plot.title, sprintf("[%s]", eval.by)))
   }
   
+  coefs <- coef(glmnet(X, Y, alpha=alpha, standardize=standardize), s=mean(best.lambdas))
   retval <- list(eval.by=eval.by, best.scores=best.scores,
                  best.lambdas=best.lambdas, lambdas.per.fold=all.lambdas,
-                 scores.per.fold=all.scores)
+                 scores.per.fold=all.scores,
+                 coef=coefs)
   class(retval) <- c('cv.glmnet', 'list')
   invisible(retval)
 }
