@@ -149,7 +149,7 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
                     standardize=standardize)
     preds <- predict(model, X[omit, , drop=FALSE])
     escore <- perf$eval(preds, Y[omit])
-    
+    # browser()
     best.scores[i] <- perf$best(escore)
     best.lambdas[i] <- model$lambda[perf$which.best(escore)]
     
@@ -171,11 +171,13 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
                          plot.title=paste(plot.title, sprintf("[%s]", eval.by)))
   }
   
-  coefs <- coef(glmnet(X, Y, alpha=alpha, standardize=standardize), s=mean(best.lambdas))
+  final.model <- glmnet(X, Y, alpha=alpha, standardize=standardize)
+  coefs <- coef(final.model, s=mean(best.lambdas))
+  perf <- perf$eval(predict(final.model, X, s=mean(best.lambdas)), Y)
   retval <- list(eval.by=eval.by, best.scores=best.scores,
                  best.lambdas=best.lambdas, lambdas.per.fold=all.lambdas,
                  scores.per.fold=all.scores,
-                 coef=coefs)
+                 coef=coefs, performance=perf)
   class(retval) <- c('cv.glmnet', 'list')
   invisible(retval)
 }

@@ -58,6 +58,7 @@ export(
   moin.table,
   
   # stats
+  standardizeData,
   evalMse,
   evalR2,
   evalSpearman,
@@ -88,6 +89,7 @@ export(
   createMap,
   
   # visuals
+  heatmap.22,
   palette.two.color,
   palette.two.colorRamp,
   palette.three.color,

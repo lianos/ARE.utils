@@ -1,3 +1,48 @@
+standardizeData <- function(X, Y, center=TRUE, scale=c('norm', 'sd', 'none'),
+                            mu=mean(Y, na.rm=TRUE)) {
+  # In lars, to normalize data:
+  #   X : subtract mean from columns then divide by the column norm
+  #   Y : subtract mean from Y
+  if (is.logical(center) && center) {
+    center <- colMeans(X)
+    X <- scale(X, center=center, FALSE)
+  } else if (is.numeric(center)) {
+    X <- scale(X, center=center, FALSE)
+  }
+  
+  if (is.character(scale)) {
+    scale.by <- match.arg(scale)
+    do.scale <- scale.by != 'none'
+  } else if (is.numeric(scale)) {
+    scale.by <- 'numeric'
+    do.scale <- TRUE
+  } else {
+    scale.by <- NA
+    do.scale <- FALSE
+  }
+  
+  if (do.scale) {
+    scale.val <- switch(scale.by, 
+      norm={
+        one <- rep(1, nrow(X))
+        sqrt(drop(one %*% X^2)) # column norm
+      },
+      sd=apply(X, 1, sd, na.rm=TRUE),
+      numeric=scale,
+      stop("Unknown scaling term")
+    )
+    X <- scale(X, FALSE, scale.val)
+  } else {
+    scale.val <- rep(1, ncol=(X))
+  }
+  
+  if (is.numeric(mu)) {
+    Y <- Y - mu
+  }
+  
+  list(X=X, Y=Y, center=center, scale.by=scale.by, scale.val=scale.val, mu=mu)
+}
+
 ###############################################################################
 # Functions to evaluate regression performance
 # --------------------------------------------
