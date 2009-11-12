@@ -1,13 +1,17 @@
 # Wrapper for functions for doing gene ontology enrichment tests using
 # GOstats
 # (Originally extracted from spelunker/medusa.R)
+# 
+# Help with GO in R:
+#   http://www.economia.unimi.it/projects/marray/2007/material/day4/Lecture7.pdf
+
 library(foreach)
 library(GOstats)
 
 # org.Hs.eg.db
 do.gostats <- function(gene.sets, universe, conditional=F, p.value=0.01,
                        ontology=c('BP', 'MF', 'CC'), annotation='org.Sc.sgd',
-                       testDirection='over') {
+                       testDirection='over', conditional=FALSE) {
   # for graphs, genes=V(graph)$id
   if (missing(universe)) {
     stop("Gimme the universe of genes we picked from")
@@ -17,8 +21,8 @@ do.gostats <- function(gene.sets, universe, conditional=F, p.value=0.01,
   do.hyperG <- function(gene.list) {
     params <- new("GOHyperGParams", geneIds=gene.list,
                   universeGeneIds=universe, annotation=annotation,
-                  ontology=ontology, pvalueCutoff=p.value, conditional=F,
-                  testDirection=testDirection)
+                  ontology=ontology, pvalueCutoff=p.value,
+                  conditional=conditional, testDirection=testDirection)
     # paramsCond <- params
     # conditional(paramsCond)
     hyperGTest(params)
