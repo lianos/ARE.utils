@@ -26,6 +26,10 @@ export(
   whos,
   wideScreen,
   
+  # igraph
+  
+  
+  
   # glmnet
   cv.glmnet,
   plot.cv.error.glmnet,
