@@ -1,5 +1,6 @@
 ###############################################################################
-# Gff
+# GFF
+###############################################################################
 
 # The read/getAttribute code was extracted from davidTiling, and pasted
 # back to the BioC mailing list (on 21-Oct-2008).

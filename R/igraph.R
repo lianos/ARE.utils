@@ -1,9 +1,9 @@
 "
 Functions to add to, or override default versions in igraph 0.5.2-2
 "
-###############################################################################
+##############################################################################
 # New Functionality
-###############################################################################
+##############################################################################
 
 normalize.edge.weights <- function(graph, attr='weight', norm.to=NULL) {
   ## RETURNS A NEW GRAPH with normalized edge weights.

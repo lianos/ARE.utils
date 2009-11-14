@@ -5,14 +5,17 @@
 # Help with GO in R:
 #   http://www.economia.unimi.it/projects/marray/2007/material/day4/Lecture7.pdf
 
-library(foreach)
-library(GOstats)
+# library(foreach)
+# library(GOstats)
 
 # org.Hs.eg.db
-do.gostats <- function(gene.sets, universe, conditional=F, p.value=0.01,
+do.gostats <- function(gene.sets, universe, conditional=FALSE, p.value=0.01,
                        ontology=c('BP', 'MF', 'CC'), annotation='org.Sc.sgd',
-                       testDirection='over', conditional=FALSE) {
+                       testDirection='over') {
   # for graphs, genes=V(graph)$id
+  library(GOstats)
+  library(foreach)
+  
   if (missing(universe)) {
     stop("Gimme the universe of genes we picked from")
   }

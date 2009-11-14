@@ -3,6 +3,7 @@
 # palette.three.color <- grDevices::colorRampPalette(c('green', 'black','red'))(3)
 # palette.gr.marray <- grDevices::colorRampPalette(c('green', 'black', 'red'))(256)
 
+
 palette.two.color <- gplots::colorpanel(2, low='black', high='red')
 palette.two.colorRamp <- gplots::colorpanel(256, low='black', high='red')
 palette.three.color <- gplots::greenred(3)
