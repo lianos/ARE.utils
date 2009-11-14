@@ -27,8 +27,16 @@ export(
   wideScreen,
   
   # igraph
-  
-  
+  head.igraph.es,
+  degree,
+  graph.laplacian,
+  serialize.cytoscape.node.attributes,
+  serialize.cytoscape,
+  load.cytoscape.edgelist,
+  normalize.edge.weights,
+  graph.rename.vertices,
+  graph.randomize.edges,
+  nuke.islands,
   
   # glmnet
   cv.glmnet,
@@ -102,5 +110,4 @@ export(
   plot.densities,
   add.error.bars,
   calendarHeat
-
 )
