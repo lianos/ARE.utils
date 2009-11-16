@@ -10,10 +10,23 @@ head.igraph.es <- function (x, n=6, ...) {
 }
 head.igraph.vs <- head.igraph.es
 
+#' Returns the degree of the graph
+#' 
+#' This function is an enhanced version from the igraph library which can
+#' calculate weighted degrees. It also adds the names of the vertices
+#' to the elements vector returned.
+#' 
+#' @param graph The igraph object
+#' @param v The ids of vertices of which the degree will be calculated.
+#' @param mode Character string, "out" for out-degree, "in" for in-degree
+#'    or "total" for the sum of the two. For undirected graphs this argument
+#'    is ignored.
+#' @param loops Logical; whether the loop edges are also counted.
+#' @param weighted Logical; whether to calculate the weighted degree for 
+#'    each node, which is the sum of the weight of all of its edges.
+#' @return A named vector of the degree at each node.
 degree <- function(graph, v=V(graph), mode=c("all", "out", "in", "total"),
                    loops=TRUE, weighted=FALSE) {
-  # Overriding igraph::degree to implement the weighted degree
-  # The degree vector is named by V(graph)$name, if that attribute exists
   stopifnot(inherits(graph, 'igraph'))
   if (is.logical(weighted) && !weighted) {
     deg <- igraph::degree(graph, v=v, mode=mode, loops=loops)
@@ -42,12 +55,19 @@ degree <- function(graph, v=V(graph), mode=c("all", "out", "in", "total"),
   deg
 }
 
+#' Graph laplacian
+#' 
+#' The laplacian of the graph. Overriden from the igraph library in order
+#' to return weighted laplacian, as well as the S-decompsed (\code{L=SS\'})
+#' version.
+#'
+#' @param graph The input igraph
+#' @param normalized Logical; whether to calculate the normalized laplacian
+#' @param weighted Logical; whether to calculate the weighted laplacian
+#' @param S.decomposed Logical; whether to calculate the S matrix
+#'    (\code{L=SS\'})
 graph.laplacian <- function(graph, normalized=FALSE, weighted=FALSE,
                             S.decomposed=FALSE, .normalize.weights=TRUE) {
-  # Returns the Laplacian of the graph (See: ?igraph::graph.laplacian)
-  # 
-  # If S.decomposed is TRUE, function returns the S matrix in L=SS', which is
-  # (n.nodes X n.edges) [see .laplacian.decomposed]
   if (is.logical(weighted) && weighted &&
       !'weight' %in% list.edge.attributes(graph)) {
     warning("No 'weight' attribute in graph -- fetching unweighted laplacian")
