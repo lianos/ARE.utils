@@ -1,5 +1,70 @@
-standardizeData <- function(X, Y, center=TRUE, scale=c('norm', 'sd', 'none'),
-                            mu=mean(Y, na.rm=TRUE)) {
+#' Standardize an input vector/matrix along its columns
+#' 
+#' Defaults to 0-centering the data. \code{standardizeData(X, scale.by="sd")}
+#' is the z-transform
+#' 
+#' @param X The data (vector or matrix)
+#' @param center logical indicating whether to center, or a numeric indicating
+#'    the value to center the data by.
+#' @param scale.by Method to scale the data by. \code{sd} scales the data by
+#'    its standard deviation, \code{norm} scales by the norm of the vectors
+#'    in the columns of \code{data}
+#' @paran center.value Optional value to use for centering if the default
+#'    zero-centering isn't desired
+#' @param scale.value Optional value to scale by, if the default column
+#'    standard deviation
+#' @return A list containing the new data along with details of the
+#'    transformations applied to it.
+standardizeData <- function(data, center=TRUE, scale.by=c('none', 'sd', 'norm'),
+                            scale.value=NA, na.rm=TRUE) {
+  is.valid.numeric <- function(value) {
+    if (!is.numeric(value)) {
+      return(FALSE)
+    } else {
+      if (length(value) == 1) {
+        return(TRUE)
+      } else if (length(value) != ncol(X)) {
+        return(FALSE)
+      }
+    }
+  }
+  if (is.vector(data)) {
+    ret.vector <- TRUE
+    data <- matrix(data, ncol=1)
+  } else {
+    ret.vector <- FALSE
+  }
+  center.value <- NA
+  scale.by <- match.arg(scale.by)
+  if ((is.logical(center) && center) || is.valid.numeric(center)) {
+    if (is.logical(center)) {
+        center.value <- colMeans(data, na.rm=TRUE)
+    }
+    data <- scale(data, center=center.value, scale=FALSE)
+  }
+  if (scale.by != 'none') {
+    if (!is.na(scale.value)) {
+      if (!is.valid.numeric(scale.value)) {
+        stop("Illegal value for scale.value")
+      }
+    } else {
+      scale.value <- switch(scale.by,
+        sd=apply(data, 2, sd, na.rm=na.rm),
+        norm=sqrt(drop(rep(1, nrow(data)) %*% data^2))
+      )
+    }
+    data <- scale(data, center=FALSE, scale=scale.value)
+  }
+  if (ret.vector) {
+    data <- as.vector(data)
+  }
+  
+  list(data=data, center.value=center.value, scale.by=scale.by,
+       scale.value=scale.value)
+}
+
+standardizeData.old <- function(X, Y, center=TRUE, scale=c('norm', 'sd', 'none'),
+                                mu=mean(Y, na.rm=TRUE)) {
   # In lars, to normalize data:
   #   X : subtract mean from columns then divide by the column norm
   #   Y : subtract mean from Y
@@ -24,6 +89,7 @@ standardizeData <- function(X, Y, center=TRUE, scale=c('norm', 'sd', 'none'),
   if (do.scale) {
     scale.val <- switch(scale.by, 
       norm={
+        browser()
         one <- rep(1, nrow(X))
         sqrt(drop(one %*% X^2)) # column norm
       },
