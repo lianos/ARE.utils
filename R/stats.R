@@ -15,7 +15,8 @@
 #'    standard deviation
 #' @return A list containing the new data along with details of the
 #'    transformations applied to it.
-standardizeData <- function(data, center=TRUE, scale.by=c('none', 'sd', 'norm'),
+standardizeData <- function(data, center=TRUE, 
+                            scale.by=c('none', 'sd', 'norm', 'numeric'),
                             scale.value=NA, na.rm=TRUE) {
   is.valid.numeric <- function(value) {
     if (!is.numeric(value)) {
@@ -42,6 +43,7 @@ standardizeData <- function(data, center=TRUE, scale.by=c('none', 'sd', 'norm'),
     }
     data <- scale(data, center=center.value, scale=FALSE)
   }
+  
   if (scale.by != 'none') {
     if (!is.na(scale.value)) {
       if (!is.valid.numeric(scale.value)) {
