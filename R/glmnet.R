@@ -149,7 +149,6 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
                     standardize=standardize)
     preds <- predict(model, X[omit, , drop=FALSE])
     escore <- perf$eval(preds, Y[omit])
-    # browser()
     best.scores[i] <- perf$best(escore)
     best.lambdas[i] <- model$lambda[perf$which.best(escore)]
     
@@ -157,6 +156,9 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
     all.scores[[i]] <- escore
     all.lambdas[[i]] <- model$lambda
   }
+  
+  lambda.stack <- do.call(rbind, padVectors(all.lambdas))
+  scores.stack <- do.call(rbind, padVectors(all.scores))
   
   if (do.plot && plot.lambda) {
     ## Show the lambda path
@@ -171,10 +173,13 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
                          plot.title=paste(plot.title, sprintf("[%s]", eval.by)))
   }
   
-  final.model <- glmnet(X, Y, alpha=alpha, standardize=standardize)
-  coefs <- coef(final.model, s=mean(best.lambdas))
+  best.lambda <- mean(best.lambdas, na.rm=TRUE)
+  model <- glmnet(X, Y, alpha=alpha, standardize=standardize)
+  coefs <- coef(model, s=best.lambda)
   perf <- perf$eval(predict(final.model, X, s=mean(best.lambdas)), Y)
-  retval <- list(eval.by=eval.by, best.scores=best.scores,
+  
+  retval <- list(coef=coefs, best.lambda=best.lambda,
+    eval.by=eval.by, best.scores=best.scores,
                  best.lambdas=best.lambdas, lambdas.per.fold=all.lambdas,
                  scores.per.fold=all.scores,
                  coef=coefs, performance=perf)

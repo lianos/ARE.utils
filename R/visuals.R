@@ -90,13 +90,23 @@ add.error.bars <- function(x, y, error, lower=NULL, upper=NULL,
   # width         : numeric value indicating the widt of the "caps" of the bars
   # do.plot       : if set to false, you only want to calculate the heights of
   #               : the bars
-  if (missing(error)) {
-    if (is.null(upper) || is.null(lower)) {
-      stop(simpleError("Need `error` or `upper` and `lower` for each y"))
+  # browser()
+  if ((missing(error) || is.null(error)) && (is.null(lower) || is.null(upper))) {
+    if (is.matrix(y)) {
+      error <- sqrt(apply(y, 2, var, na.rm=TRUE) / nrow(y))
+      y <- colMeans(y, na.rm=TRUE)
+    } else {
+      warning("Can't calculate error : only 1 observation / x value")
+      error <- rep(0, length(x))
     }
-  } else {
     lower <- y - error
     upper <- y + error
+  }
+  
+  if (is.null(lower) || is.null(upper)) {
+    warning("Can't calculate lower/upper bounds of err at each x")
+    lower <- y
+    upper <- y
   }
   
   xlim <- range(x)
