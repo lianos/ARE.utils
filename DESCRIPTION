@@ -5,7 +5,7 @@ Author: Steve Lianoglou <slianoglou@gmail.com>
 Maintainer: Steve Lianoglou <slianoglou@gmail.com>
 Description: A convenient place to store my utility functions across projects.
     Some code isn't mine and are snippets I've found on the web.
-Depends: caret, gplots, CCA, foreach
+Depends: caret, gplots, CCA, foreach, VICCBiostat
 License: BSD (unless otherwise noted)
 URL: http://github.com/lianos/ARE.utils
 LazyLoad: yes

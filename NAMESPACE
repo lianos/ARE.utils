@@ -84,6 +84,8 @@ export(
   # strings
   strip.slashes,
   strip.whitespace,
+  string.startswith,
+  string.endswith,
   
   # test
   almost.equal,
@@ -108,6 +110,7 @@ export(
   palette.two.colorRamp,
   palette.three.color,
   palette.gr.marray,
+  palette.by.marray,
   my.image.matrix,
   plot.densities,
   add.error.bars,

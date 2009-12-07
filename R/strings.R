@@ -17,3 +17,32 @@ strip.whitespace <- function(from, internal=FALSE) {
   return(from)
 }
 
+string.startswith <- function(subject, what, strip=TRUE, ignore.case=TRUE) {
+  if (nchar(subject) == 0 || nchar(what) == 0) {
+    return(FALSE)
+  }
+  if (strip) {
+    subject <- strip.whitespace(subject)
+    what <- strip.whitespace(what)
+  }
+  if (ignore.case) {
+    subject <- tolower(subject)
+    what <- tolower(what)
+  }
+  substring(subject, 1, nchar(what)) == what
+}
+
+string.endswith <- function(subject, what, strip=TRUE, ignore.case=TRUE) {
+  if (nchar(subject) == 0 || nchar(what) == 0) {
+    return(FALSE)
+  }
+  if (strip) {
+    subject <- strip.whitespace(subject)
+    what <- strip.whitespace(what)
+  }
+  if (ignore.case) {
+    subject <- tolower(subject)
+    what <- tolower(what)
+  }
+  substring(subject, nchar(subject) - nchar(what) + 1) == what
+}

@@ -1,7 +1,7 @@
 # Taken from gplots::heatmap.2 version 2.7.3
 ## $Id: heatmap.2.R 1364 2009-10-22 20:53:11Z warnes $
 
-heatmap.22 <- function (x,
+heatmap.22 <- function(x,
 
                        ## dendrogram control
                        Rowv = TRUE,
@@ -21,10 +21,11 @@ heatmap.22 <- function (x,
 
                        ## mapping data to colors
                        breaks,
-                       symbreaks=min(x, na.rm=TRUE) < 0 || scale!="none",
+                       symbreaks=min(x, na.rm=TRUE) < 0 || scale != "none",
 
                        ## colors
-                       col="heat.colors",
+                       # col="heat.colors",
+                       col=palette.by.marray,
 
                        ## block sepration
                        colsep,
@@ -39,7 +40,8 @@ heatmap.22 <- function (x,
                        na.color=par("bg"),
 
                        ## level trace
-                       trace=c("column","row","both","none"),
+                       # trace=c("column","row","both","none"),
+                       trace=c("none", "column","row","both"),
                        tracecol="cyan",
                        hline=median(breaks),
                        vline=median(breaks),
@@ -281,13 +283,18 @@ heatmap.22 <- function (x,
     x <- sweep(x, 2, sx, "/")
   }
   ## Set up breaks and force values outside the range into the endmost bins
-  if(missing(breaks) || is.null(breaks) || length(breaks)<1 )
-    {
-      if( missing(col) ||  is.function(col) )
-        breaks <- 16
-      else 
-        breaks <- length(col)+1
+  if (missing(breaks) || is.null(breaks) || length(breaks) < 1)
+  {
+    # if (missing(col) ||  is.function(col))
+    #   breaks <- 16
+    # else 
+    #   breaks <- length(col)+1
+    if (is.character(col)) {
+      breaks <- length(col) + 1
+    } else {
+      breaks <- 16
     }
+  }
 
   if(length(breaks)==1)
     {

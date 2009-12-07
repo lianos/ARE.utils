@@ -172,7 +172,8 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
     plot.cv.error.glmnet(all.lambdas, all.scores, plot.se=plot.se,
                          plot.title=paste(plot.title, sprintf("[%s]", eval.by)))
   }
-  
+
+  final.model <- glmnet(X, Y, alpha=alpha, standardize=standardize)
   best.lambda <- mean(best.lambdas, na.rm=TRUE)
   model <- glmnet(X, Y, alpha=alpha, standardize=standardize)
   coefs <- coef(model, s=best.lambda)

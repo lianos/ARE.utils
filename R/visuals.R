@@ -8,6 +8,7 @@ palette.two.color <- gplots::colorpanel(2, low='black', high='red')
 palette.two.colorRamp <- gplots::colorpanel(256, low='black', high='red')
 palette.three.color <- gplots::greenred(3)
 palette.gr.marray <- gplots::greenred(255)
+palette.by.marray <- gplots::colorpanel(255, 'blue', 'black', 'yellow')
 
 my.image.matrix <- function(m, ...) {
   # Plotting matrices as images is weird ...
