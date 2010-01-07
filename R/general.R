@@ -201,23 +201,11 @@ if (!existsMethod('which.duplicated', 'matrix')) {
 }
 ###############################################################################
 
-function(how.wide=Sys.getenv("COLUMNS")) {
+wideScreen <- function(how.wide=Sys.getenv("COLUMNS")) {
   # Set R to print to the same width as the terminal is set to
   # Taken from: http://onertipaday.blogspot.com/2008/12/tips-from-jason.html
   if (!is.character(how.wide) && !is.numeric(how.wide)) {
     how.wide <- 150
   }
   options(width=as.integer(how.wide))
-}
-
-sourceDir <- function(path, trace=TRUE, ...) {
-  for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {
-    if (trace) {
-      cat(nm,":")
-    }
-    source(file.path(path, nm), ...)
-    if(trace) {
-      cat("\n")
-    }
-  }
 }
