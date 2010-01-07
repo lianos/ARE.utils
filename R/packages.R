@@ -16,15 +16,19 @@ libLoaded <- function(lib.name) {
   tolower(lib.name) %in% tolower(gsub("package:", "", search()))
 }
 
-sourceDir <- function(path='.', trace = TRUE, ...) {
+source <- function(...) {
   v <- options()$verbose
   options(verbose=FALSE)
+  base::source(...)
+  options(verobse=v)
+}
+
+sourceDir <- function(path='.', trace = TRUE, ...) {
   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {
     if(trace) cat(nm,":")           
     source(file.path(path, nm), ...)
     if(trace) cat("\n")
   }
-  options(verbose=v)
 }
 
 # packages.dump <- function(dump.file) {
