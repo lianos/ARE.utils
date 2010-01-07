@@ -12,6 +12,10 @@ reloadPackages <- function(from="~/R.packages.dump.txt") {
   biocLite(packages)
 }
 
+libLoaded <- function(lib.name) {
+  tolower(lib.name) %in% tolower(gsub("package:", "", search()))
+}
+
 # packages.dump <- function(dump.file) {
 #   tmp <- installed.packages()
 #   installed.old <- as.vector(tmp[is.na(tmp[,"Priority"]), 1])

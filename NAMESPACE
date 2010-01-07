@@ -49,7 +49,7 @@ export(
   do.gostats,
   
   # learning
-  createFolds,
+  # createFolds,
   accuracy,
   
   # list
@@ -67,6 +67,7 @@ export(
   # packages
   installedPackages,
   reloadPackages,
+  libLoaded,
   
   # reports.moin
   moin.table,

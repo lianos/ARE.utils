@@ -1,5 +1,6 @@
 dopar <- function(what, backend=c('doMC')) {
-  library(foreach)
+  if (!libLoaded('doMC')) library(doMC)
+  
   if (missing(what)) {
     cat("Using", getDoParName(), "backend with", getDoParWorkers(), 
         ifelse(getDoParWorkers() == 1, "worker", "workers"), "\n")
@@ -200,16 +201,13 @@ if (!existsMethod('which.duplicated', 'matrix')) {
 }
 ###############################################################################
 
-wideScreen <- function(howWide=Sys.getenv("COLUMNS")) {
+function(how.wide=Sys.getenv("COLUMNS")) {
   # Set R to print to the same width as the terminal is set to
   # Taken from: http://onertipaday.blogspot.com/2008/12/tips-from-jason.html
-  # if (missing(howWide)) {
-  #   howWide <- as.integer(Sys.getenv("COLUMNS"))
-  # }
-  # if (is.na(howWide)) {
-  #   howWide <- 150
-  # }
-  options(width=as.integer(howWide))
+  if (!is.character(how.wide) && !is.numeric(how.wide)) {
+    how.wide <- 150
+  }
+  options(width=as.integer(how.wide))
 }
 
 sourceDir <- function(path, trace=TRUE, ...) {
