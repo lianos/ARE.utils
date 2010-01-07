@@ -69,6 +69,7 @@ export(
   reloadPackages,
   libLoaded,
   sourceDir,
+  source,
   
   # reports.moin
   moin.table,
