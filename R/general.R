@@ -1,5 +1,6 @@
 dopar <- function(what, backend=c('doMC')) {
-  if (!libLoaded('doMC')) library(doMC)
+  backend <- match.arg(backend)
+  if (!libLoaded(backend)) library(backend, character.only=TRUE)
   
   if (missing(what)) {
     cat("Using", getDoParName(), "backend with", getDoParWorkers(), 
@@ -9,10 +10,13 @@ dopar <- function(what, backend=c('doMC')) {
       if (what) what <- 2 else registerDoSEQ()
     }
     if (is.numeric(what)) {
-      library(backend, character.only=TRUE)
-      register <- paste('register', toupper(substring(backend, 1, 1)),
-                        substring(backend, 2), sep="")
-      do.call(register, list(what))
+      if (what < 2) {
+        registerDoSEQ()
+      } else {
+        register <- paste('register', toupper(substring(backend, 1, 1)),
+                          substring(backend, 2), sep="")
+        do.call(register, list(what))
+      }
     }
   }
   invisible(getDoParWorkers() > 1)
@@ -96,7 +100,7 @@ dim.names <- function(object, along=1, dnames=NULL) {
 }
 
 
-whos <- function(pattern='*', show.memory=FALSE, ENV=.GlobalEnv) {
+whos <- function(pattern='*', show.memory=TRUE, ENV=.GlobalEnv) {
   if (!is.character(pattern)) {
     # Maybe we pass in a list
     things <- names(pattern)
