@@ -1,5 +1,5 @@
 which.max <- function(x, ...) UseMethod('which.max')
-which.max.default <- function(x, ...) base::which.max
+which.max.default <- function(x, ...) base::which.max(x)
 which.max.matrix <- function(x, arr.ind=FALSE, tri=NULL, diag=FALSE) {
   if (!arr.ind) return(base::which.max(x))
   if (!is.null(tri)) {
@@ -12,7 +12,7 @@ which.max.matrix <- function(x, arr.ind=FALSE, tri=NULL, diag=FALSE) {
 }
 
 which.min <- function(x, ...) UseMethod('which.min')
-which.min.default <- function(x, ...) base::which.min
+which.min.default <- function(x, ...) base::which.min(x)
 which.min.matrix <- function(x, arr.ind=FALSE, tri=NULL, diag=FALSE) {
   if (!arr.ind) return(base::which.min(x))
   if (!is.null(tri)) {
