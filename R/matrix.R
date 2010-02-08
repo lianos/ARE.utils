@@ -1,3 +1,35 @@
+which.max <- function(x, ...) UseMethod('which.max')
+which.max.default <- base::which.max
+which.max.matrix <- function(x, arr.ind=FALSE, tri=NULL, diag=FALSE) {
+  if (!arr.ind) {
+    return(base::which.max(x))
+  }
+  if (!is.null(tri)) {
+    tri <- match.arg(tri, c('upper', 'lower'))
+    tri <- if (tri == 'upper') upper.tri(x) else lower.tri(x)
+    val <- which(tri & x == max(x[tri]), arr.ind=TRUE)
+  } else {
+    val <- which(x == max(x), arr.ind=TRUE)
+  }
+  val
+}
+
+which.min <- function(x, ...) UseMethod('which.min')
+which.min.default <- base::which.min
+which.min.matrix <- function(x, arr.ind=FALSE, tri=NULL, diag=FALSE) {
+  if (!arr.ind) {
+    return(base::which.min(x))
+  }
+  if (!is.null(tri)) {
+    tri <- match.arg(tri, c('upper', 'lower'))
+    tri <- if (tri == 'upper') upper.tri(x, diag) else lower.tri(x, diag)
+    val <- which(tri & x == min(x[tri]), arr.ind=TRUE)
+  } else {
+    val <- which(x == min(x), arr.ind=TRUE)
+  }
+  val
+}
+
 ind2sub <- function(idxs, nrow, ncol=NULL) {
   # Returns a (length(idxs) x 2) matrix of (x,y) indices the linear indices in
   # `idxs` (R stores matrices in column-major).
