@@ -56,6 +56,12 @@ export(
   extractEmbeddedLists,
   
   # matrix
+  which.max,
+  which.max.default,
+  which.max.matrix,
+  which.min,
+  which.min.default,
+  which.min.matrix,
   ind2sub,
   sub2ind,
   matrix.power,
@@ -69,7 +75,7 @@ export(
   reloadPackages,
   libLoaded,
   sourceDir,
-  source,
+  # source,
   
   # reports.moin
   moin.table,

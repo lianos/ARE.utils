@@ -123,6 +123,9 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
   #   $dev     : fraction of (null) deviance explained (for "elnet", this is the R-square)
   # 
   # glmnet::predict returns a matrix of predictions over all values of lambda
+  if (!libLoaded('caret')) {
+    library(caret)
+  }
   if (do.plot && plot.lambda && multiplot) {
     opar <- par(mfrow=c(1,2))
     on.exit(par(opar))

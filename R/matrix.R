@@ -5,9 +5,9 @@ which.max.matrix <- function(x, arr.ind=FALSE, tri=NULL, diag=FALSE) {
   if (!is.null(tri)) {
     tri <- match.arg(tri, c('upper', 'lower'))
     tri <- if (tri == 'upper') upper.tri(x, diag) else lower.tri(x, diag)
-    which(tri & x == max(x[tri]), arr.ind=TRUE)
+    which(tri & x == max(x[tri]), arr.ind=TRUE)[1,,drop=FALSE]
   } else {
-    which(x == max(x), arr.ind=TRUE)
+    which(x == max(x), arr.ind=TRUE)[1,,drop=FALSE]
   }
 }
 
@@ -18,9 +18,9 @@ which.min.matrix <- function(x, arr.ind=FALSE, tri=NULL, diag=FALSE) {
   if (!is.null(tri)) {
     tri <- match.arg(tri, c('upper', 'lower'))
     tri <- if (tri == 'upper') upper.tri(x, diag) else lower.tri(x, diag)
-    which(tri & x == min(x[tri]), arr.ind=TRUE)
+    which(tri & x == min(x[tri]), arr.ind=TRUE)[1,,drop=FALSE]
   } else {
-    which(x == min(x), arr.ind=TRUE)
+    which(x == min(x), arr.ind=TRUE)[1,,drop=FALSE]
   }
 }
 
