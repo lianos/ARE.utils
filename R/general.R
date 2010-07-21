@@ -1,5 +1,7 @@
 dopar <- function(what, backend=c('doMC')) {
-  library(foreach)
+  backend <- match.arg(backend)
+  if (!libLoaded(backend)) library(backend, character.only=TRUE)
+  
   if (missing(what)) {
     cat("Using", getDoParName(), "backend with", getDoParWorkers(), 
         ifelse(getDoParWorkers() == 1, "worker", "workers"), "\n")
@@ -8,10 +10,13 @@ dopar <- function(what, backend=c('doMC')) {
       if (what) what <- 2 else registerDoSEQ()
     }
     if (is.numeric(what)) {
-      library(backend, character.only=TRUE)
-      register <- paste('register', toupper(substring(backend, 1, 1)),
-                        substring(backend, 2), sep="")
-      do.call(register, list(what))
+      if (what < 2) {
+        registerDoSEQ()
+      } else {
+        register <- paste('register', toupper(substring(backend, 1, 1)),
+                          substring(backend, 2), sep="")
+        do.call(register, list(what))
+      }
     }
   }
   invisible(getDoParWorkers() > 1)
@@ -95,7 +100,7 @@ dim.names <- function(object, along=1, dnames=NULL) {
 }
 
 
-whos <- function(pattern='*', show.memory=FALSE, ENV=.GlobalEnv) {
+whos <- function(pattern='*', show.memory=TRUE, ENV=.GlobalEnv) {
   if (!is.character(pattern)) {
     # Maybe we pass in a list
     things <- names(pattern)
@@ -200,26 +205,11 @@ if (!existsMethod('which.duplicated', 'matrix')) {
 }
 ###############################################################################
 
-wideScreen <- function(howWide=Sys.getenv("COLUMNS")) {
+wideScreen <- function(how.wide=Sys.getenv("COLUMNS")) {
   # Set R to print to the same width as the terminal is set to
   # Taken from: http://onertipaday.blogspot.com/2008/12/tips-from-jason.html
-  # if (missing(howWide)) {
-  #   howWide <- as.integer(Sys.getenv("COLUMNS"))
-  # }
-  # if (is.na(howWide)) {
-  #   howWide <- 150
-  # }
-  options(width=as.integer(howWide))
-}
-
-sourceDir <- function(path, trace=TRUE, ...) {
-  for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {
-    if (trace) {
-      cat(nm,":")
-    }
-    source(file.path(path, nm), ...)
-    if(trace) {
-      cat("\n")
-    }
+  if (!is.character(how.wide) && !is.numeric(how.wide)) {
+    how.wide <- 150
   }
+  options(width=as.integer(how.wide))
 }

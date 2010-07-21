@@ -13,8 +13,8 @@ do.gostats <- function(gene.sets, universe, conditional=FALSE, p.value=0.01,
                        ontology=c('BP', 'MF', 'CC'), annotation='org.Sc.sgd',
                        testDirection='over') {
   # for graphs, genes=V(graph)$id
-  library(GOstats)
-  library(foreach)
+  if (!libLoaded('GOstats')) library(GOstats)
+  if (!libLoaded('foreach')) library(foreach)
   
   if (missing(universe)) {
     stop("Gimme the universe of genes we picked from")
@@ -35,6 +35,7 @@ do.gostats <- function(gene.sets, universe, conditional=FALSE, p.value=0.01,
     GO <- foreach (gset=gene.sets, .packages=c('GOstats')) %dopar% {
       do.hyperG(gset)
     }
+    names(GO) <- names(gene.sets)
   } else {
     GO <- do.hyperG(gene.sets)
   }

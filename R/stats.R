@@ -1,3 +1,146 @@
+# The first argument (Ta) can be either a table or a matrix of 2X2.
+# Or instead, the values of the table can be entered one by one to the function 
+
+# Barnard's test calculates the probabilities for contingency tables.  It has been shown that for 2x2 tables, Barnard's test
+# has a higher power than Fisher's Exact test.  Barnard's test is a non-parametric test that relies upon a computer to generate
+# the distribution of the Wald statistic.  Using a computer program, one could find the nuisance parameter that maximizes the 
+# probability of the observations displayed from a table.
+# Despite giving lower p-values for 2x2 tables, Barnard's test hasn't been used as often as Fisher's test because of its
+# computational difficulty.  This code gives the Wald statistic, the nuisance parameter, and the p-value for any 2x2 table.
+# The table can be written as:
+# 			Var.1
+# 		 ---------------
+# 		   a		b	 r1=a+b
+# 	Var.2
+# 		   c		d	 r2=c+d
+# 		 ---------------
+# 		 c1=a+c   c2=b+d	 n=c1+c2 
+  
+# One example would be 
+# 				Physics
+# 			 Pass	     Fail
+# 			 ---------------
+# 		Crane	   8		14
+#   Collage	
+# 		Egret	   1		3
+# 			 ---------------
+# 
+# After implementing the function, simply call it by the command:
+# Barnardextest(8,14,1,3)
+# This will display the results: 
+  
+# "The contingency table is:"
+#       [,1] [,2]
+# [1,]    8   14
+# [2,]    1    3
+# "Wald Statistic:"
+# 0.43944
+# "Nuisance parameter:"
+# 0.9001
+# "The 1-tailed p-value:"
+# 0.4159073 
+  
+# On a side note, I believe there are more efficient codes than this one.  For example, I've seen codes in Matlab that run
+# faster and display nicer-looking graphs.  However, this code will still provide accurate results and a plot that gives the
+# p-value based on the nuisance parameter.  I did not come up with the idea of this code, I simply translated Matlab code 
+# into R, occasionally using different methods to get the same result.  The code was translated from:
+# 
+# Trujillo-Ortiz, A., R. Hernandez-Walls, A. Castro-Perez, L. Rodriguez-Cardozo. Probability Test.  A MATLAB file. URL
+# http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=6198
+# 
+# My goal was to make this test accessible to everyone.  Although there are many ways to run this test through Matlab, I hadn't
+# seen any code to implement this test in R.  I hope it is useful for you, and if you have any questions or ways to improve
+# this code, please contact me at calhoun.peter@gmail.com. 
+#
+# Usage:
+#   Barnardextest(matrix(c(8,1,14,3),2,2)) 
+#   fisher.test(matrix(c(8,1,14,3),2,2)) 
+#   Convictions <- matrix(c(2, 10, 15, 3), nrow = 2, dimnames = list(c("Dizygotic", "Monozygotic"), c("Convicted", "Not convicted")))
+#   Convictions
+#   fisher.test(Convictions, alternative = "less")
+barnardExTest<-function(Ta, Tb=NULL, Tc=NULL, Td=NULL, to.print=FALSE, to.plot=TRUE) {
+  # Tal edit: choosing if to work with a 2X2 table or with 4 numbers:
+  if (is.null(Tb) | is.null(Tc) | is.null(Td)) {
+    # If one of them is null, then Ta should have an entire table, and we can take it's values
+    if (is.table(Ta) | is.matrix(Ta)) {
+      if(sum(dim(Ta) == c(2,2)) == 2) {
+        Tb <- Ta[1,2]
+        Tc <- Ta[2,1]
+        Td <- Ta[2,2]
+        Ta <- Ta[1,1]
+      } else {
+        stop("The table is not 2X2, please check it again...")
+      }
+    } else {
+      stop("We are missing value in the table")
+    }
+  } 
+
+  c1<-Ta+Tc
+  c2<-Tb+Td
+  n<-c1+c2
+  pao<-Ta/c1
+  pbo<-Tb/c2
+  pxo<-(Ta+Tb)/n
+  TXO<-abs(pao-pbo)/sqrt(pxo*(1-pxo)*(1/c1+1/c2))
+  n1<-prod(1:c1)
+  n2<-prod(1:c2) 
+
+  P<-{}
+  for( p in (0:99+.01)/100) {
+    TX<-{}
+    S<-{}
+    for(i in c(0:c1)) {
+      for( j in c(0:c2)) {
+        if (prod(1:i)==0){fac1<-1} else {fac1<-prod(1:i)}
+        if (prod(1:j)==0){fac2<-1} else {fac2<-prod(1:j)}
+        if (prod(1:(c1-i))==0){fac3<-1} else {fac3<-prod(1:(c1-i))}
+        if (prod(1:(c2-j))==0){fac4<-1} else {fac4<-prod(1:(c2-j))} 
+        
+        small.s<-(n1*n2*(p^(i+j))*(1-p)^(n-(i+j))/(fac1*fac2*fac3*fac4))
+        S<-cbind(S,small.s)
+        pa<- i/c1
+        pb<-j/c2
+        px <- (i+j)/n
+        if (is.nan((pa-pb)/sqrt(px*(1-px)*((1/c1)+(1/c2))))) {
+          tx<-0
+        } else {
+          tx <- (pa-pb)/sqrt(px*(1-px)*((1/c1)+(1/c2)))
+        }
+        TX<-cbind(TX,tx)
+      }
+    }
+    
+    P<-cbind(P,sum(S[which(TX>=TXO)]))
+  } 
+  
+  np<-which(P==max(P))
+  p <- (0:99+.01)/100
+  nuisance<-p[np]
+  pv<-P[np] 
+
+  if (to.print) {
+    print("The contingency table is:")
+    print(matrix(c(Ta,Tc,Tb,Td),2,2))
+    print("Wald Statistic:")
+    print(TXO)
+    print("Nuisance parameter:")
+    print(nuisance)
+    print("The 1-tailed p-value:")
+    print(pv)
+  }
+  
+  if (to.plot) {
+    plot(p,P,type="l",main="Barnard's exact P-value", xlab="Nuisance parameter", ylab="P-value")
+    points(nuisance,pv,col=2)
+  }
+  
+  # Tal edit: Returning the results in a list:
+  return(list(contingency.table=as.table(matrix(c(Ta,Tc,Tb,Td),2,2)),
+              Wald.Statistic=TXO, Nuisance.parameter=nuisance,
+              p.value.one.tailed=pv))
+} 
+
 #' Standardize an input vector/matrix along its columns
 #' 
 #' Defaults to 0-centering the data. \code{standardizeData(X, scale.by="sd")}
@@ -179,7 +322,20 @@ evalSpearman <- function(predicted, Y) {
   })
 }
 
-regressionPerformance <- function(eval.by=c('mse', 'r2', 'spearman')) {
+evalAccuracy <- function(predicted, Y) {
+  if (!is.matrix(predicted)) {
+    predicted <- matrix(predicted, ncol=1)
+  }
+  if (!is.vector(Y)) {
+    Y <- as.vector(Y)
+  }
+  stopifnot(nrow(predicted) == length(Y))
+  apply(predicted, 2, function(col) {
+    sum(sign(col) == Y) / length(Y)
+  })
+}
+
+regressionPerformance <- function(eval.by=c('mse', 'r2', 'spearman', 'accuracy')) {
   eval.by <- match.arg(eval.by)
   if (eval.by == 'mse') {       # Evaluate by Mean Squared Error
     evalF <- evalMse
@@ -191,6 +347,10 @@ regressionPerformance <- function(eval.by=c('mse', 'r2', 'spearman')) {
     which.best <- which.max
   } else if (eval.by == 'spearman') {
     evalF <- evalSpearman
+    best <- max
+    which.best <- which.max
+  } else if (eval.by == 'accuracy') {
+    evalF <- evalAccuracy
     best <- max
     which.best <- which.max
   }

@@ -123,13 +123,12 @@ ident <- function(what, as.sparse=FALSE) {
   }
   
   if (as.sparse) {
-    library(Matrix)
+    if (!libLoaded('Matrix')) library(Matrix)
     I <- Matrix(0, what, what, sparse=TRUE)
+    diag(I) <- 1
   } else {
-    I <- matrix(0, what, what)
+    I <- diag(nrow=what, ncol=what)
   }
-  
-  diag(I) <- 1
   I
 }
 eye <- ident

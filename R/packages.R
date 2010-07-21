@@ -12,6 +12,28 @@ reloadPackages <- function(from="~/R.packages.dump.txt") {
   biocLite(packages)
 }
 
+libLoaded <- function(lib.name) {
+  tolower(lib.name) %in% tolower(gsub("package:", "", search()))
+}
+
+# source <- function(...) {
+#   v <- options()$verbose
+#   options(verbose=FALSE)
+#   base::source(...)
+#   options(verobse=v)
+# }
+
+sourceDir <- function(path='.', trace = TRUE, ...) {
+  v <- options()$verbose
+  options(verbose=FALSE)
+  for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {
+    if(trace) cat(nm,":")           
+    source(file.path(path, nm), ...)
+    if(trace) cat("\n")
+  }
+  options(verbose=v)
+}
+
 # packages.dump <- function(dump.file) {
 #   tmp <- installed.packages()
 #   installed.old <- as.vector(tmp[is.na(tmp[,"Priority"]), 1])

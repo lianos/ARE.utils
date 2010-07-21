@@ -1,5 +1,5 @@
 # Comparison / Testing functions
-almost.equal <- function(x, y, tolerance=.Machine$double.eps^0.5,
+almost.equal <- function(x, y, tolerance=.Machine$double.eps^0.6,
                          na.rm=TRUE) {
   # You might want to look at all.equal
   if (na.rm) {

@@ -1,3 +1,6 @@
+## These functions should be deprecated as of glmnet version 1.3, which
+## provides a cv.glmnet function.
+
 "
 Generic glmnet code for doing cross validation.
 "
@@ -66,8 +69,9 @@ plot.cv.error.glmnet <- function(lambdas, eval.metric, plot.se=TRUE,
   }
 }
 
-cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
-                      standardize=TRUE, eval.by=c('mse', 'r2', 'spearman'),
+mycv.glmnet <- function(X, Y, family=c("gaussian","binomial","poisson","multinomial","cox"),
+                      alpha=.75, K=10, all.folds=NULL, nlambda=100,
+                      standardize=TRUE, eval.by=c('mse', 'r2', 'spearman', 'accuracy'),
                       verbose=TRUE,  do.plot=FALSE, plot.se=TRUE,
                       plot.lambda=FALSE, multiplot=TRUE,
                       plot.title=NULL) {
@@ -123,6 +127,10 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
   #   $dev     : fraction of (null) deviance explained (for "elnet", this is the R-square)
   # 
   # glmnet::predict returns a matrix of predictions over all values of lambda
+  if (!libLoaded('caret')) {
+    library(caret)
+  }
+  family <- match.arg(family)
   if (do.plot && plot.lambda && multiplot) {
     opar <- par(mfrow=c(1,2))
     on.exit(par(opar))
@@ -136,6 +144,10 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
   
   ## Determine metric to evaluate model by
   eval.by <- match.arg(eval.by)
+  if (family == 'binomial' && eval.by != 'accuracy') {
+    warning("Setting evaluation metric to `accuracy` for logistic regression")
+    eval.by <- 'accuracy'
+  }
   perf <- regressionPerformance(eval.by)
   
   all.scores <- list() # Vectors per fold holding the mse/r2/etc per lambda
@@ -149,7 +161,6 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
                     standardize=standardize)
     preds <- predict(model, X[omit, , drop=FALSE])
     escore <- perf$eval(preds, Y[omit])
-    # browser()
     best.scores[i] <- perf$best(escore)
     best.lambdas[i] <- model$lambda[perf$which.best(escore)]
     
@@ -158,11 +169,14 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
     all.lambdas[[i]] <- model$lambda
   }
   
+  lambda.stack <- do.call(rbind, padVectors(all.lambdas))
+  scores.stack <- do.call(rbind, padVectors(all.scores))
+  
   if (do.plot && plot.lambda) {
     ## Show the lambda path
     plot.cv.lambda.glmnet(all.lambdas, plot.se=plot.se, plot.title=plot.title)
   }
-
+  
   if (do.plot) {
     if (plot.lambda && !multiplot) {
       dev.new()
@@ -170,14 +184,18 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
     plot.cv.error.glmnet(all.lambdas, all.scores, plot.se=plot.se,
                          plot.title=paste(plot.title, sprintf("[%s]", eval.by)))
   }
-  
+
   final.model <- glmnet(X, Y, alpha=alpha, standardize=standardize)
-  coefs <- coef(final.model, s=mean(best.lambdas))
+  best.lambda <- mean(best.lambdas, na.rm=TRUE)
+  model <- glmnet(X, Y, alpha=alpha, standardize=standardize)
+  coefs <- coef(model, s=best.lambda)
   perf <- perf$eval(predict(final.model, X, s=mean(best.lambdas)), Y)
-  retval <- list(eval.by=eval.by, best.scores=best.scores,
+  
+  retval <- list(coef=coefs, best.lambda=best.lambda,
+                 eval.by=eval.by, best.scores=best.scores,
                  best.lambdas=best.lambdas, lambdas.per.fold=all.lambdas,
                  scores.per.fold=all.scores,
-                 coef=coefs, performance=perf)
+                 performance=perf)
   class(retval) <- c('cv.glmnet', 'list')
   invisible(retval)
 }
