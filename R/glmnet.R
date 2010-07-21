@@ -1,3 +1,6 @@
+## These functions should be deprecated as of glmnet version 1.3, which
+## provides a cv.glmnet function.
+
 "
 Generic glmnet code for doing cross validation.
 "
@@ -66,8 +69,9 @@ plot.cv.error.glmnet <- function(lambdas, eval.metric, plot.se=TRUE,
   }
 }
 
-cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
-                      standardize=TRUE, eval.by=c('mse', 'r2', 'spearman'),
+mycv.glmnet <- function(X, Y, family=c("gaussian","binomial","poisson","multinomial","cox"),
+                      alpha=.75, K=10, all.folds=NULL, nlambda=100,
+                      standardize=TRUE, eval.by=c('mse', 'r2', 'spearman', 'accuracy'),
                       verbose=TRUE,  do.plot=FALSE, plot.se=TRUE,
                       plot.lambda=FALSE, multiplot=TRUE,
                       plot.title=NULL) {
@@ -126,6 +130,7 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
   if (!libLoaded('caret')) {
     library(caret)
   }
+  family <- match.arg(family)
   if (do.plot && plot.lambda && multiplot) {
     opar <- par(mfrow=c(1,2))
     on.exit(par(opar))
@@ -139,6 +144,10 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
   
   ## Determine metric to evaluate model by
   eval.by <- match.arg(eval.by)
+  if (family == 'binomial' && eval.by != 'accuracy') {
+    warning("Setting evaluation metric to `accuracy` for logistic regression")
+    eval.by <- 'accuracy'
+  }
   perf <- regressionPerformance(eval.by)
   
   all.scores <- list() # Vectors per fold holding the mse/r2/etc per lambda
@@ -167,7 +176,7 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
     ## Show the lambda path
     plot.cv.lambda.glmnet(all.lambdas, plot.se=plot.se, plot.title=plot.title)
   }
-
+  
   if (do.plot) {
     if (plot.lambda && !multiplot) {
       dev.new()
@@ -183,10 +192,10 @@ cv.glmnet <- function(X, Y, alpha=.75, K=10, all.folds=NULL, nlambda=100,
   perf <- perf$eval(predict(final.model, X, s=mean(best.lambdas)), Y)
   
   retval <- list(coef=coefs, best.lambda=best.lambda,
-    eval.by=eval.by, best.scores=best.scores,
+                 eval.by=eval.by, best.scores=best.scores,
                  best.lambdas=best.lambdas, lambdas.per.fold=all.lambdas,
                  scores.per.fold=all.scores,
-                 coef=coefs, performance=perf)
+                 performance=perf)
   class(retval) <- c('cv.glmnet', 'list')
   invisible(retval)
 }

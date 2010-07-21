@@ -322,7 +322,20 @@ evalSpearman <- function(predicted, Y) {
   })
 }
 
-regressionPerformance <- function(eval.by=c('mse', 'r2', 'spearman')) {
+evalAccuracy <- function(predicted, Y) {
+  if (!is.matrix(predicted)) {
+    predicted <- matrix(predicted, ncol=1)
+  }
+  if (!is.vector(Y)) {
+    Y <- as.vector(Y)
+  }
+  stopifnot(nrow(predicted) == length(Y))
+  apply(predicted, 2, function(col) {
+    sum(sign(col) == Y) / length(Y)
+  })
+}
+
+regressionPerformance <- function(eval.by=c('mse', 'r2', 'spearman', 'accuracy')) {
   eval.by <- match.arg(eval.by)
   if (eval.by == 'mse') {       # Evaluate by Mean Squared Error
     evalF <- evalMse
@@ -334,6 +347,10 @@ regressionPerformance <- function(eval.by=c('mse', 'r2', 'spearman')) {
     which.best <- which.max
   } else if (eval.by == 'spearman') {
     evalF <- evalSpearman
+    best <- max
+    which.best <- which.max
+  } else if (eval.by == 'accuracy') {
+    evalF <- evalAccuracy
     best <- max
     which.best <- which.max
   }

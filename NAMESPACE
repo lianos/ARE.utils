@@ -41,7 +41,7 @@ export(
   nuke.islands,
   
   # glmnet
-  cv.glmnet,
+  mycv.glmnet,
   plot.cv.error.glmnet,
   plot.cv.lambda.glmnet,
   

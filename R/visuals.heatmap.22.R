@@ -81,7 +81,7 @@ heatmap.22 <- function(x,
                        ...
                        )
 {
-  if (!libLoaded('gplots')) {
+  if ((is.function('libLoaded') && libLoaded('gplots')) || require('gplots')) {
     library(gplots)
   }
   scale01 <- function(x, low=min(x), high=max(x) )
@@ -538,7 +538,9 @@ heatmap.22 <- function(x,
       image(z=matrix(z, ncol=1),
             col=col, breaks=tmpbreaks,
             xaxt="n", yaxt="n")
-
+      # image(matrix(z, ncol=1),
+      #       col=col, breaks=tmpbreaks,
+      #       xaxt="n", yaxt="n")
       par(usr=c(0,1,0,1))
       lv <- pretty(breaks)
       xv <- scale01(as.numeric(lv), min.raw, max.raw)
