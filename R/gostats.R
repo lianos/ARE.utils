@@ -85,13 +85,15 @@ go.members <- function(result, pvalue=pvalueCutoff(result), categorySize=NULL,
 
 ##' An augmented HTML report for the enriched GO terms.
 ##'
-##' This includes a column where the elements found for the enrichment are included.
+##' This includes a column where the elements found for the enrichment are
+##' included.
 ##'
 ##' @param result A GOHyperGResult object
 ##' @param with.elements Whether or not (TRUE/FALSE) to print the genes that were used
 ##' to determine enrichment for the particular category.
 go.htmlReport <- function(result, file="", append=FALSE, label="", digits=3,
-                          htmlLinks=TRUE, with.elements=TRUE) {
+                          htmlLinks=TRUE, with.elements=TRUE,
+                          link.elements=TRUE) {
   have.xtable <- suppressWarnings({
     require("xtable", quietly=TRUE, warn.conflicts=FALSE)
   })
@@ -109,6 +111,14 @@ go.htmlReport <- function(result, file="", append=FALSE, label="", digits=3,
                      "view=details&search_constraint=terms&depth=0&query=%s",
                      sep="")
 
+  ## Figure out the URL to use for element linking
+  organism <- unlist(strsplit(annotation(result), '\\.'))[2]
+  if (organism == 'Sc') {
+    ELEMENT_URL <- "http://www.yeastgenome.org/cgi-bin/locus.fpl?locus=%s"
+  } else {
+    ELEMENT_URL <- "http://www.genecards.org/cgi-bin/carddisp.pl?gene=%s"
+  }
+  
   summary <- Category:::XXX_getSummaryGeneric_XXX()
   df <- do.call(summary, list(result, htmlLinks=htmlLinks))
   
@@ -121,7 +131,12 @@ go.htmlReport <- function(result, file="", append=FALSE, label="", digits=3,
     members <- go.members(result)
     df$members <- lapply(df[,1], function(go.id) {
       elems <- members[[go.id]]$symbol
+
       if (length(elems) > 0) {
+        if (link.elements) {
+          urls <- sprintf(ELEMENT_URL, elems)
+          elems <- sprintf('<a href="%s">%s</a>', urls, elems)
+        }
         elems <- paste(elems, collapse=", ")
       } else {
         warning("Empty symbol list for:", go.id)
