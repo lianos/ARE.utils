@@ -1,63 +1,109 @@
-# The first argument (Ta) can be either a table or a matrix of 2X2.
-# Or instead, the values of the table can be entered one by one to the function 
+##' A simple wrapper to do a fisher/hypogeometric test
+##'
+##' This is meant to be used with "named" elements -- thing of names of genes
+##' that you picked, etc. Not numbers of elements of each type (blue balls, red balls)
+##' 
+##' @param picked The balls that are picked
+##' @param special The names of the elements that are "special"
+##' @param universe All of the balls that can possible by picked
+hyperG <- function(picked, special, universe, alternative='greater') {
+  picked <- unique(picked)
+  special <- unique(special)
+  universe <- unique(universe)
+  stopifnot(all(picked %in% universe))
+  stopifnot(all(special %in% universe))
+  
+  picked.special <- picked[picked %in% special]
+  picked.rest <- setdiff(picked, picked.special)
+  other.special <- setdiff(special, picked.special)
+  other.rest <- setdiff(universe, unique(c(picked.special, picked.rest,
+                                           other.special)))
+  
+  counts <- matrix(c(length(picked.special), length(picked.rest),
+                     length(other.special),  length(other.rest)),
+                   nrow=2, byrow=TRUE)
+  fisher.test(counts, alternative=alternative)
+}
 
-# Barnard's test calculates the probabilities for contingency tables.  It has been shown that for 2x2 tables, Barnard's test
-# has a higher power than Fisher's Exact test.  Barnard's test is a non-parametric test that relies upon a computer to generate
-# the distribution of the Wald statistic.  Using a computer program, one could find the nuisance parameter that maximizes the 
-# probability of the observations displayed from a table.
-# Despite giving lower p-values for 2x2 tables, Barnard's test hasn't been used as often as Fisher's test because of its
-# computational difficulty.  This code gives the Wald statistic, the nuisance parameter, and the p-value for any 2x2 table.
-# The table can be written as:
-# 			Var.1
-# 		 ---------------
-# 		   a		b	 r1=a+b
-# 	Var.2
-# 		   c		d	 r2=c+d
-# 		 ---------------
-# 		 c1=a+c   c2=b+d	 n=c1+c2 
-  
-# One example would be 
-# 				Physics
-# 			 Pass	     Fail
-# 			 ---------------
-# 		Crane	   8		14
-#   Collage	
-# 		Egret	   1		3
-# 			 ---------------
-# 
-# After implementing the function, simply call it by the command:
-# Barnardextest(8,14,1,3)
-# This will display the results: 
-  
-# "The contingency table is:"
-#       [,1] [,2]
-# [1,]    8   14
-# [2,]    1    3
-# "Wald Statistic:"
-# 0.43944
-# "Nuisance parameter:"
-# 0.9001
-# "The 1-tailed p-value:"
-# 0.4159073 
-  
-# On a side note, I believe there are more efficient codes than this one.  For example, I've seen codes in Matlab that run
-# faster and display nicer-looking graphs.  However, this code will still provide accurate results and a plot that gives the
-# p-value based on the nuisance parameter.  I did not come up with the idea of this code, I simply translated Matlab code 
-# into R, occasionally using different methods to get the same result.  The code was translated from:
-# 
-# Trujillo-Ortiz, A., R. Hernandez-Walls, A. Castro-Perez, L. Rodriguez-Cardozo. Probability Test.  A MATLAB file. URL
-# http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=6198
-# 
-# My goal was to make this test accessible to everyone.  Although there are many ways to run this test through Matlab, I hadn't
-# seen any code to implement this test in R.  I hope it is useful for you, and if you have any questions or ways to improve
-# this code, please contact me at calhoun.peter@gmail.com. 
-#
-# Usage:
-#   Barnardextest(matrix(c(8,1,14,3),2,2)) 
-#   fisher.test(matrix(c(8,1,14,3),2,2)) 
-#   Convictions <- matrix(c(2, 10, 15, 3), nrow = 2, dimnames = list(c("Dizygotic", "Monozygotic"), c("Convicted", "Not convicted")))
-#   Convictions
-#   fisher.test(Convictions, alternative = "less")
+##' Barnard's test -- an alternative to a hyperG test
+##
+## The first argument (Ta) can be either a table or a matrix of 2X2.
+## Or instead, the values of the table can be entered one by one to the
+## function
+## 
+## Barnard's test calculates the probabilities for contingency tables.
+## It has been shown that for 2x2 tables, Barnard's test
+## has a higher power than Fisher's Exact test.  Barnard's test is a
+## non-parametric test that relies upon a computer to generate
+## the distribution of the Wald statistic.  Using a computer program, one
+## could find the nuisance parameter that maximizes the 
+## probability of the observations displayed from a table.
+## Despite giving lower p-values for 2x2 tables, Barnard's test hasn't been
+## used as often as Fisher's test because of its
+## computational difficulty.  This code gives the Wald statistic, the nuisance
+## parameter, and the p-value for any 2x2 table.
+## The table can be written as:
+## 			Var.1
+## 		 ---------------
+## 		   a		b	 r1=a+b
+## 	Var.2
+## 		   c		d	 r2=c+d
+## 		 ---------------
+## 		 c1=a+c   c2=b+d	 n=c1+c2 
+ # 
+## One example would be 
+## 				Physics
+## 			 Pass	     Fail
+## 			 ---------------
+## 		Crane	   8		14
+##   Collage	
+## 		Egret	   1		3
+## 			 ---------------
+## 
+## After implementing the function, simply call it by the command:
+## Barnardextest(8,14,1,3)
+## This will display the results: 
+## 
+## "The contingency table is:"
+##       [,1] [,2]
+## [1,]    8   14
+## [2,]    1    3
+## "Wald Statistic:"
+## 0.43944
+## "Nuisance parameter:"
+## 0.9001
+## "The 1-tailed p-value:"
+## 0.4159073 
+## 
+## On a side note, I believe there are more efficient codes than this one.
+## For example, I've seen codes in Matlab that run
+## faster and display nicer-looking graphs.  However, this code will still
+## provide accurate results and a plot that gives the
+## p-value based on the nuisance parameter.  I did not come up with the idea
+## of this code, I simply translated Matlab code 
+## into R, occasionally using different methods to get the same result.
+##
+## The code was translated from:
+## 
+## Trujillo-Ortiz, A., R. Hernandez-Walls, A. Castro-Perez, L. Rodriguez-Cardozo.
+## Probability Test.  A MATLAB file. URL
+## http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=6198
+## 
+## My goal was to make this test accessible to everyone.  Although there are many
+## ways to run this test through Matlab, I hadn't seen any code to implement this
+## test in R.
+##
+## I hope it is useful for you, and if you have any questions or ways to improve
+## this code, please contact me at calhoun.peter@gmail.com. 
+## 
+## Usage:
+##   Barnardextest(matrix(c(8,1,14,3),2,2)) 
+##   fisher.test(matrix(c(8,1,14,3),2,2)) 
+##   Convictions <- matrix(c(2, 10, 15, 3), nrow=2,
+##                         dimnames=list(c("Dizygotic", "Monozygotic"),
+##                                       c("Convicted", "Not convicted")))
+##   Convictions
+##   fisher.test(Convictions, alternative = "less")
 barnardExTest<-function(Ta, Tb=NULL, Tc=NULL, Td=NULL, to.print=FALSE, to.plot=TRUE) {
   # Tal edit: choosing if to work with a 2X2 table or with 4 numbers:
   if (is.null(Tb) | is.null(Tc) | is.null(Td)) {
@@ -141,23 +187,23 @@ barnardExTest<-function(Ta, Tb=NULL, Tc=NULL, Td=NULL, to.print=FALSE, to.plot=T
               p.value.one.tailed=pv))
 } 
 
-#' Standardize an input vector/matrix along its columns
-#' 
-#' Defaults to 0-centering the data. \code{standardizeData(X, scale.by="sd")}
-#' is the z-transform
-#' 
-#' @param X The data (vector or matrix)
-#' @param center logical indicating whether to center, or a numeric indicating
-#'    the value to center the data by.
-#' @param scale.by Method to scale the data by. \code{sd} scales the data by
-#'    its standard deviation, \code{norm} scales by the norm of the vectors
-#'    in the columns of \code{data}
-#' @paran center.value Optional value to use for centering if the default
-#'    zero-centering isn't desired
-#' @param scale.value Optional value to scale by, if the default column
-#'    standard deviation
-#' @return A list containing the new data along with details of the
-#'    transformations applied to it.
+##' Standardize an input vector/matrix along its columns
+##' 
+##' Defaults to 0-centering the data. \code{standardizeData(X, scale.by="sd")}
+##' is the z-transform
+##' 
+##' @param X The data (vector or matrix)
+##' @param center logical indicating whether to center, or a numeric indicating
+##'    the value to center the data by.
+##' @param scale.by Method to scale the data by. \code{sd} scales the data by
+##'    its standard deviation, \code{norm} scales by the norm of the vectors
+##'    in the columns of \code{data}
+##' @paran center.value Optional value to use for centering if the default
+##'    zero-centering isn't desired
+##' @param scale.value Optional value to scale by, if the default column
+##'    standard deviation
+##' @return A list containing the new data along with details of the
+##'    transformations applied to it.
 standardizeData <- function(data, center=TRUE, 
                             scale.by=c('none', 'sd', 'norm', 'numeric'),
                             scale.value=NA, na.rm=TRUE) {
