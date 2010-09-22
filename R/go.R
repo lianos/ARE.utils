@@ -9,9 +9,14 @@
 ##' @return A list of GO terms. Names of list elements is `id`. If no GO terms
 ##' are found for the given gene, then the character vector here is empty.
 getGOAnnotations <- function(id, ontology=c('BP', 'MF', 'CC'),
-                                annotation='org.Sc.sgd') {
+                             annotation='org.Sc.sgd', specific=FALSE) {
   ontology <- match.arg(ontology)
-  map <- getAnnMap('GO', annotation)
+  if (specific) {
+    map <- getAnnMap("GO", annotation)
+  } else {
+    map <- revmap(getAnnMap('GO2ALLORFS', annotation))
+  }
+  
   gos <- mget(id, map, ifnotfound=NA)
   universe <- lapply(gos, function(dat) {
     if (!is.list(dat)) return(character())
