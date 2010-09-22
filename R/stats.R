@@ -1,12 +1,16 @@
 ##' A simple wrapper to do a fisher/hypogeometric test
 ##'
 ##' This is meant to be used with "named" elements -- thing of names of genes
-##' that you picked, etc. Not numbers of elements of each type (blue balls, red balls)
+##' that you picked, etc. Not numbers of elements of each type
+##' (blue balls, red balls)
+##' 
+##' @seealso phyper
 ##' 
 ##' @param picked The balls that are picked
 ##' @param special The names of the elements that are "special"
 ##' @param universe All of the balls that can possible by picked
-hyperG <- function(picked, special, universe, alternative='greater') {
+hyperG <- function(picked, special, universe, alternative='greater',
+                   use.fisher=FALSE) {
   picked <- unique(picked)
   special <- unique(special)
   universe <- unique(universe)
@@ -14,15 +18,26 @@ hyperG <- function(picked, special, universe, alternative='greater') {
   stopifnot(all(special %in% universe))
   
   picked.special <- picked[picked %in% special]
-  picked.rest <- setdiff(picked, picked.special)
-  other.special <- setdiff(special, picked.special)
-  other.rest <- setdiff(universe, unique(c(picked.special, picked.rest,
-                                           other.special)))
   
-  counts <- matrix(c(length(picked.special), length(picked.rest),
-                     length(other.special),  length(other.rest)),
-                   nrow=2, byrow=TRUE)
-  fisher.test(counts, alternative=alternative)
+  white.picked <- length(picked.special)
+  white.total <- length(special)
+  black.total <- length(setdiff(universe, special))
+  black.picked <- length(picked) - white.picked
+  
+  if (use.fisher) {
+    m <- matrix(c(white.picked, white.total - white.picked,
+                  black.picked, black.total - black.picked),
+                nrow=2, byrow=TRUE)
+                     
+    pval <- fisher.test(m, alternative=alternative)$p.value
+  } else {
+    ## take the -1 because we want evidence for as extreme or more and when
+    ## lower.tail=FALSE, phyper returns P[X > x].
+    pval <- phyper(white.picked - 1, white.total, black.total,
+                   white.picked + black.picked, lower.tail=FALSE)
+  }
+  
+  pval
 }
 
 ##' Barnard's test -- an alternative to a hyperG test
@@ -104,12 +119,14 @@ hyperG <- function(picked, special, universe, alternative='greater') {
 ##                                       c("Convicted", "Not convicted")))
 ##   Convictions
 ##   fisher.test(Convictions, alternative = "less")
-barnardExTest<-function(Ta, Tb=NULL, Tc=NULL, Td=NULL, to.print=FALSE, to.plot=TRUE) {
-  # Tal edit: choosing if to work with a 2X2 table or with 4 numbers:
+barnardExTest <- function(Ta, Tb=NULL, Tc=NULL, Td=NULL, to.print=FALSE,
+                          to.plot=TRUE) {
+  ## Tal edit: choosing if to work with a 2X2 table or with 4 numbers:
   if (is.null(Tb) | is.null(Tc) | is.null(Td)) {
-    # If one of them is null, then Ta should have an entire table, and we can take it's values
+    ## If one of them is null, then Ta should have an entire table, and we
+    ## can take it's values
     if (is.table(Ta) | is.matrix(Ta)) {
-      if(sum(dim(Ta) == c(2,2)) == 2) {
+      if (sum(dim(Ta) == c(2,2)) == 2) {
         Tb <- Ta[1,2]
         Tc <- Ta[2,1]
         Td <- Ta[2,2]
@@ -122,48 +139,48 @@ barnardExTest<-function(Ta, Tb=NULL, Tc=NULL, Td=NULL, to.print=FALSE, to.plot=T
     }
   } 
 
-  c1<-Ta+Tc
-  c2<-Tb+Td
-  n<-c1+c2
-  pao<-Ta/c1
-  pbo<-Tb/c2
-  pxo<-(Ta+Tb)/n
-  TXO<-abs(pao-pbo)/sqrt(pxo*(1-pxo)*(1/c1+1/c2))
-  n1<-prod(1:c1)
-  n2<-prod(1:c2) 
+  c1 <- Ta+Tc
+  c2 <- Tb+Td
+  n <- c1+c2
+  pao <- Ta/c1
+  pbo <- Tb/c2
+  pxo <- (Ta+Tb)/n
+  TXO <- abs(pao-pbo)/sqrt(pxo*(1-pxo)*(1/c1+1/c2))
+  n1 <- prod(1:c1)
+  n2 <- prod(1:c2) 
 
-  P<-{}
-  for( p in (0:99+.01)/100) {
-    TX<-{}
-    S<-{}
-    for(i in c(0:c1)) {
-      for( j in c(0:c2)) {
+  P <- NULL
+  for (p in (0:99+.01)/100) {
+    TX <- NULL
+    S <- NULL
+    for (i in c(0:c1)) {
+      for (j in c(0:c2)) {
         if (prod(1:i)==0){fac1<-1} else {fac1<-prod(1:i)}
         if (prod(1:j)==0){fac2<-1} else {fac2<-prod(1:j)}
         if (prod(1:(c1-i))==0){fac3<-1} else {fac3<-prod(1:(c1-i))}
         if (prod(1:(c2-j))==0){fac4<-1} else {fac4<-prod(1:(c2-j))} 
         
-        small.s<-(n1*n2*(p^(i+j))*(1-p)^(n-(i+j))/(fac1*fac2*fac3*fac4))
-        S<-cbind(S,small.s)
-        pa<- i/c1
-        pb<-j/c2
+        small.s <- (n1*n2*(p^(i+j))*(1-p)^(n-(i+j))/(fac1*fac2*fac3*fac4))
+        S <- cbind(S,small.s)
+        pa <- i/c1
+        pb <-j/c2
         px <- (i+j)/n
         if (is.nan((pa-pb)/sqrt(px*(1-px)*((1/c1)+(1/c2))))) {
-          tx<-0
+          tx <- 0
         } else {
           tx <- (pa-pb)/sqrt(px*(1-px)*((1/c1)+(1/c2)))
         }
-        TX<-cbind(TX,tx)
+        TX <- cbind(TX,tx)
       }
     }
     
-    P<-cbind(P,sum(S[which(TX>=TXO)]))
+    P <- cbind(P,sum(S[which(TX>=TXO)]))
   } 
   
-  np<-which(P==max(P))
+  np <- which(P==max(P))
   p <- (0:99+.01)/100
-  nuisance<-p[np]
-  pv<-P[np] 
+  nuisance <- p[np]
+  pv <- P[np] 
 
   if (to.print) {
     print("The contingency table is:")
@@ -177,15 +194,16 @@ barnardExTest<-function(Ta, Tb=NULL, Tc=NULL, Td=NULL, to.print=FALSE, to.plot=T
   }
   
   if (to.plot) {
-    plot(p,P,type="l",main="Barnard's exact P-value", xlab="Nuisance parameter", ylab="P-value")
+    plot(p, P, type="l", main="Barnard's exact P-value",
+         xlab="Nuisance parameter", ylab="P-value")
     points(nuisance,pv,col=2)
   }
   
-  # Tal edit: Returning the results in a list:
+  ## Tal edit: Returning the results in a list:
   return(list(contingency.table=as.table(matrix(c(Ta,Tc,Tb,Td),2,2)),
               Wald.Statistic=TXO, Nuisance.parameter=nuisance,
               p.value.one.tailed=pv))
-} 
+}
 
 ##' Standardize an input vector/matrix along its columns
 ##' 

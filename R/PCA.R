@@ -2,12 +2,22 @@
 ## PCA Stuff from affycoretools
 ## I'm changing this so that the user can define a different set of sizes for
 ## the points on a 3dplot.
+
+##' Performs and plots PCA stuff.
+##'
+##' This function was taken/modified from affycoretools. Added:
+##'
+##' @param var.sizes Only considered when \code{plot3d=TRUE}. If \code{TRUE},
+##' the spheres in 3d space change in size from large to small (at midpoint)
+##' then large. If this is a numeric vector of length 1, it is considered
+##' to be the "midpoint" at which point the spheres would start growing larger
+##' from there. If its a numeric vector as long as there are experiments, it
+##' is considered to predetermined sizes of each sphere.
 plotPCA <- function(object, groups=NULL, groupnames=NULL, addtext=NULL,
                     x.coord=NULL, y.coord=NULL, screeplot=FALSE,
                     squarepca=FALSE, pch=NULL, col=NULL, pcs=c(1,2),
                     legend=TRUE, main="Principal Components Plot",
-                    plot3d=FALSE, ...) {
-  args <- list(...)
+                    plot3d=FALSE, center=TRUE, scale.=FALSE, var.sizes=FALSE) {
   if (length(pcs) != 2 && !plot3d) {
     stop("You can only plot two principal components.\n", call. = FALSE)
   }
@@ -24,7 +34,7 @@ plotPCA <- function(object, groups=NULL, groupnames=NULL, addtext=NULL,
     }
     if (is.null(groupnames)) groupnames <- sampleNames(object)
     if (is.factor(groupnames)) groupnames <- as.character(groupnames)
-    pca <- prcomp(t(exprs(object)))
+    pca <- prcomp(t(exprs(object)), center=center, scale.=scale.)
     len <- length(sampleNames(object))
   } else {
     if (class(object) == "matrix") {
@@ -35,7 +45,7 @@ plotPCA <- function(object, groups=NULL, groupnames=NULL, addtext=NULL,
       }
       if (is.null(groupnames)) groupnames <- colnames(object)
       if (is.factor(groupnames)) groupnames <- as.character(groupnames)
-      pca <- prcomp(t(object))
+      pca <- prcomp(t(object), center=center, scale.=scale.)
       len <- dim(object)[2]
     } else {
       if (class(object) == "prcomp") {
@@ -65,22 +75,9 @@ plotPCA <- function(object, groups=NULL, groupnames=NULL, addtext=NULL,
       }
       plotstuff <- pcaPCH(len, groups, pch, col)
       ##########################################################################
-      ## ME
       ## plot3d(pca$x[,pcs], type = "s", col = plotstuff$col, size = 2)
-      if (is.null(args$sizes)) {
-        if (!is.null(args$var.size) && args$var.size) {
-          mid.point <- floor(len / 2)
-          sizes <- c(seq(4, 1, length=mid.point),
-                     seq(1, 4, length=len - mid.point))
-        } else {
-          sizes <- rep(2, len)
-        }
-      } else {
-        sizes <- args$sizes
-      }
-      if (length(sizes) != len) {
-        warning("sizes vector isn't compatable size")
-        sizes <- rep(2, len)
+      if (!is.null(var.sizes)) {
+        point.size <- pca.point.size(var.sizes, len)
       }
       if (!is.null(col)) {
         cols <- col
@@ -92,7 +89,7 @@ plotPCA <- function(object, groups=NULL, groupnames=NULL, addtext=NULL,
         cols <- plotstuff$col
       }
       
-      plot3d(pca$x[,pcs], type="s", col=cols, size=sizes)
+      plot3d(pca$x[,pcs], type="s", col=cols, size=point.size)
       cat(paste("Sometimes rgl doesn't plot the first time.\nIf there",
                 "isn't anything in the plotting window, close it and",
                 "re-run plotPCA().\n"))
@@ -123,7 +120,28 @@ plotPCA <- function(object, groups=NULL, groupnames=NULL, addtext=NULL,
   invisible(list(pch=plotstuff, pca=pca))
 }
 
-             
+pca.point.size <- function(var.sizes, len, max.size=4, min.size=1) {
+  mid.point <- floor(len / 2)
+  if (is.logical(var.sizes) && !var.sizes) {
+    return(rep(2, len))
+  }
+  if (is.numeric(var.sizes)) {
+    if (length(var.sizes) == len) {
+      return(var.sizes)
+    }
+    if (length(var.sizes) == 1) {
+      if (var.sizes < 1 || var.sizes > len) {
+        stop("Midpoint specification out of bounds")
+      }
+      mid.point <- var.sizes
+    }
+  }
+
+  sizes <- c(seq(max.size, min.size, length=mid.point),
+             seq(min.size, max.size, length=len - mid.point))
+  sizes
+}
+
 pca.legend <- function(pca, groups, groupnames, pch.df,  x.coord=NULL,
                        y.coord=NULL, saveup=FALSE) {
   ## A function to try to automagically place legend in a pca plot

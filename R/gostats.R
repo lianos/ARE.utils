@@ -16,7 +16,7 @@
 ##' @param genes A list of the genes that are "picked". Expected to be entrez
 ##' id's for everything except yeast -- in which case, use ORFs
 ##' @param universe A list of genes that could have been picked.
-do.gostats <- function(genes, universe, conditional=TRUE, p.value=0.01,
+do.gostats <- function(genes, universe, conditional=TRUE, p.value=0.05,
                        ontology=c('BP', 'MF', 'CC'), annotation='org.Sc.sgd',
                        testDirection='over') {
   if (!require(GOstats)) {
@@ -52,6 +52,9 @@ do.gostats <- function(genes, universe, conditional=TRUE, p.value=0.01,
 ##' @param selected Really, don't use it.
 go.members <- function(result, pvalue=pvalueCutoff(result), categorySize=NULL,
                        selected=geneIds(NULL)) {
+  if (!require('annotate')) {
+    stop("Annotate library required")
+  }
   if (!is(result, "GOHyperGResult")) {
     stop("result must be a GOHyperGResult instance (or subclass)")
   }
