@@ -1,8 +1,7 @@
 ##' A simple wrapper to do a fisher/hypogeometric test
 ##'
 ##' This is meant to be used with "named" elements -- thing of names of genes
-##' that you picked, etc. Not numbers of elements of each type
-##' (blue balls, red balls)
+##' that you picked, etc. Not numbers of elements of each type.
 ##' 
 ##' @seealso phyper
 ##' 
@@ -31,10 +30,15 @@ hyperG <- function(picked, special, universe, alternative='greater',
                      
     pval <- fisher.test(m, alternative=alternative)$p.value
   } else {
-    ## take the -1 because we want evidence for as extreme or more and when
-    ## lower.tail=FALSE, phyper returns P[X > x].
-    pval <- phyper(white.picked - 1, white.total, black.total,
-                   white.picked + black.picked, lower.tail=FALSE)
+    if (alternative == 'greater') {
+      ## take the -1 because we want evidence for as extreme or more and when
+      ## lower.tail=FALSE, phyper returns P[X > x].
+      pval <- phyper(white.picked - 1, white.total, black.total,
+                     white.picked + black.picked, lower.tail=FALSE)
+    } else {
+      pval <- phyper(white.picked, white.total, black.total,
+                     white.picked + black.picked, lower.tail=TRUE)
+    }
   }
   
   pval

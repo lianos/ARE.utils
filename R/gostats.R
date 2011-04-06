@@ -1,17 +1,53 @@
 ## Wrapper for functions for doing gene ontology enrichment tests using
 ## GOstats
-## 
+##
 ## Help with GO in R:
 ##   http://www.economia.unimi.it/projects/marray/2007/material/day4/Lecture7.pdf
 ##
-## TO perform many computations in parallell, do:
-## GO <- foreach(gset=gene.sets, .packages=c('GOstats)) %dopar% {
-##   do.gostats(gset, universe, ...)
-## }
-##
-## For humans, use annotation="org.Hs.eg.db" and use entrez ids 
+## For humans, use annotation="org.Hs.eg.db" and use entrez ids
 ## For yeast, use annotation='org.Sc.Sgd', and use ORF ids
 
+##' Runs a GO report for all ontologies
+##'
+##' The GO tests are run and one html file is written that has the results
+##' for all ontologies tested
+##'
+##' @param genes The entrez ids of your "special" genes
+##' @param universe The entrez ids of the "universe"
+##' @return The list of results from GOstats::hyperGTest
+do.goReport <- function(genes, universe, ontologies=c('BP', 'MF', 'CC'),
+                        conditional=TRUE, p.value=0.05, testDirection='over',
+                        annotation='org.Hs.eg.db', path=".",
+                        report.name="GO-report.html", verbose=FALSE) {
+  genes <- unique(as.character(genes))
+  universe <- union(genes, as.character(universe))
+
+  gos <- foreach(ontology=ontologies, .packages='GOstats') %dopar% {
+    if (verbose) {
+      cat("...", ontology, "\n")
+    }
+    do.gostats(genes, universe, conditional=conditional, p.value=p.value,
+               ontology=ontology, annotation=annotation,
+               testDirection=testDirection)
+  }
+  names(gos) <- ontologies
+
+  html.out <- file.path(path, report.name)
+  if (verbose) {
+    cat("Creating HTML report to:", html.out, "\n")
+  }
+
+  for (ontology in ontologies) {
+    append <- ontology != ontologies[1]
+    go.htmlReport(gos[[ontology]], append=append, file=html.out)
+  }
+
+  invisible(gos)
+}
+
+################################################################################
+## Functions below work with one report at a time
+## -----------------------------------------------------------------------------
 ##' Performs GO analysis on a list of selected genes, given the universe.
 ##' @param genes A list of the genes that are "picked". Expected to be entrez
 ##' id's for everything except yeast -- in which case, use ORFs
@@ -26,6 +62,8 @@ do.gostats <- function(genes, universe, conditional=TRUE, p.value=0.05,
     stop("Gimme the universe of genes we picked from")
   }
   ontology <- match.arg(ontology)
+  genes <- as.character(genes)
+  universe <- as.character(universe)
   params <- new("GOHyperGParams", geneIds=genes,
                 universeGeneIds=universe, annotation=annotation,
                 ontology=ontology, pvalueCutoff=p.value,
@@ -37,20 +75,20 @@ do.gostats <- function(genes, universe, conditional=TRUE, p.value=0.05,
 
 ##' Get the genes responsible for GO enrichment in each category. This is a less-robust
 ##' version of the GOstats::probeSetSummary
-##' 
+##'
 ##' It will return you the names of the genes in each category, as they were passed
 ##' in to the do.gostats function. We assume that the genes were passed to the
 ##' do.gostats function, and that these id's were entrez-like (in yeast, the default
 ##' is to use the ORF.
-##' 
+##'
 ##' Returns a data.frame for each enriched GO term. Each data.frame has the
 ##' entrez-like id, as well as its symobl (if found)
 ##'
 ##' @param result A GOHyperGResult object
-##' @param pvalue The value to use as a pvalue cutoff for the GO categorys
+##' @param p.value The value to use as a pvalue cutoff for the GO categorys
 ##' @param categorySize Not used
 ##' @param selected Really, don't use it.
-go.members <- function(result, pvalue=pvalueCutoff(result), categorySize=NULL,
+go.members <- function(result, p.value=pvalueCutoff(result), categorySize=NULL,
                        selected=geneIds(NULL)) {
   if (!require('annotate')) {
     stop("Annotate library required")
@@ -58,22 +96,28 @@ go.members <- function(result, pvalue=pvalueCutoff(result), categorySize=NULL,
   if (!is(result, "GOHyperGResult")) {
     stop("result must be a GOHyperGResult instance (or subclass)")
   }
-  elements2entrez <- getAnnMap("ENTREZID", annotation(result))
-  elementIds <- ls(elements2entrez)
+
+  ## Was this necessary for S. cerevisae?
+  ## elements2entrez <- getAnnMap("ENTREZID", annotation(result))
+  ## elementIds <- ls(elements2entrez)
   summary <- Category:::XXX_getSummaryGeneric_XXX()
-  goids <- summary(result, pvalue, categorySize)[, 1] ## Enriched go ids
+  goids <- summary(result, p.value, categorySize)[, 1] ## Enriched go ids
 
   universe <- geneIdUniverse(result)[goids]
-  sig.ids <- geneIds(result) ## The "interesting" genes passed into original call
-  
+  sig.ids <- geneIds(result) ## The "interesting" genes from original call
+
   sig.in.go <- lapply(universe, function(ids) {
     ids <- as.character(ids)
     have <- ids %in% sig.ids
     ids[have]
   })
 
-  name.map <- getAnnMap("GENENAME", annotation(result))
-  
+  if (annotation(result) == 'org.Sc.sgd') {
+    name.map <- getAnnMap("GENENAME", annotation(result))
+  } else {
+    name.map <- getAnnMap("SYMBOL", annotation(result))
+  }
+
   df <- lapply(sig.in.go, function(x) {
     symbols <- mget(x, name.map, ifnotfound=NA)
     symbols <- sapply(symbols, '[', 1)
@@ -92,9 +136,10 @@ go.members <- function(result, pvalue=pvalueCutoff(result), categorySize=NULL,
 ##' included.
 ##'
 ##' @param result A GOHyperGResult object
-##' @param with.elements Whether or not (TRUE/FALSE) to print the genes that were used
-##' to determine enrichment for the particular category.
-go.htmlReport <- function(result, file="", append=FALSE, label="", digits=3,
+##' @param with.elements Whether or not (TRUE/FALSE) to print the genes that
+##' were used to determine enrichment for the particular category.
+go.htmlReport <- function(result, p.value=pvalueCutoff(result), file="",
+                          append=FALSE, label="", digits=3,
                           htmlLinks=TRUE, with.elements=TRUE,
                           link.elements=TRUE) {
   have.xtable <- suppressWarnings({
@@ -107,9 +152,11 @@ go.htmlReport <- function(result, file="", append=FALSE, label="", digits=3,
     stop("result must be a GOHyperGResult instance (or subclass)")
   }
   if (nchar(file) == 0) {
-    file <- sprintf("enriched.%s.html", paste(testName(result), collapse=","))
+    file <- sprintf("enriched.%s.p%.2f.html",
+                    paste(testName(result), collapse=","),
+                    p.value)
   }
-  
+
   AMIGO_URL <- paste("http://www.godatabase.org/cgi-bin/amigo/go.cgi?",
                      "view=details&search_constraint=terms&depth=0&query=%s",
                      sep="")
@@ -121,17 +168,17 @@ go.htmlReport <- function(result, file="", append=FALSE, label="", digits=3,
   } else {
     ELEMENT_URL <- "http://www.genecards.org/cgi-bin/carddisp.pl?gene=%s"
   }
-  
+
   summary <- Category:::XXX_getSummaryGeneric_XXX()
-  df <- do.call(summary, list(result, htmlLinks=htmlLinks))
-  
+  df <- do.call(summary, list(result, p.value, htmlLinks=htmlLinks))
+
   if (nrow(df) == 0) {
     warning("No results to report")
     return(invisible(TRUE))
   }
 
   if (with.elements) {
-    members <- go.members(result)
+    members <- go.members(result, p.value)
     df$members <- lapply(df[,1], function(go.id) {
       elems <- members[[go.id]]$symbol
 
@@ -147,7 +194,7 @@ go.htmlReport <- function(result, file="", append=FALSE, label="", digits=3,
       }
       elems
     })
-    
+
   }
 
   dig <- rep(digits, ncol(df) + 1) ## need +1 for xtable row name

@@ -1,24 +1,26 @@
-trim.data <- function(x, qtile=0.01, na.rm=TRUE, trim.to.na=TRUE,
+trim.data <- function(x, qtile=0.01, trim.to=c("NA", "quantile", "remove"),
                       side=c('both', 'upper', 'lower')) {
-  # Use this when trying to balance out heatmaps of data, eg:
-  #   library(gplots)
-  #   heatmap.2(trim.data(expression), ...)
+  trim.to <- match.arg(trim.to)
   side <- match.arg(side)
   if (side == 'both') {
     side <- c('upper', 'lower')
   }
   
-  qtile <- min(qtile, 1-qtile, na.rm=na.rm)
-  lo <- quantile(x, qtile, na.rm=na.rm)
-  hi <- quantile(x, 1-qtile, na.rm=na.rm)
+  qtile <- min(qtile, 1-qtile, na.rm=TRUE)
+  lo <- quantile(x, qtile, na.rm=TRUE)
+  hi <- quantile(x, 1-qtile, na.rm=TRUE)
 
   if ('lower' %in% side) {
-    x[x < lo] <- if (trim.to.na) NA else lo
+    x[x < lo] <- if (trim.to == "quantile") lo else NA
   }
   if ('upper' %in% side) {
-    x[x > hi] <- if (trim.to.na) NA else hi
+    x[x > hi] <- if (trim.to == "quantile") hi else NA
   }
 
+  if (trim.to == "remove") {
+    x <- x[!is.na(x)]
+  }
+  
   x
 }
 

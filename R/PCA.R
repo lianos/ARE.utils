@@ -64,7 +64,8 @@ plotPCA <- function(object, groups=NULL, groupnames=NULL, addtext=NULL,
       }
     }
   }
-  
+
+  plotstuff <- NULL
   if (screeplot) {
     plot(pca, main = "Screeplot")
   } else {
@@ -241,3 +242,18 @@ colvec <- function(len){
 ################################################################################
 ## END: affycoretools-modified code
 ################################################################################
+
+screeProportionOfVariance.prcomp <- function(pca, barplot=TRUE,
+                                             main="Screeplot", ...) {
+  vars <- pca$sdev^2
+  df <- data.frame(sdev=pca$sdev, var=vars, prop.var=vars/sum(vars))
+  df$cum.prop <- cumsum(df$prop.var)
+  rownames(df) <- colnames(pca$rotation)
+
+  if (barplot) {
+    barplot(df$prop.var, names.arg=rownames(df), main=main,
+            ylab="Proportion of Variance", ...)
+  }
+  
+  invisible(df)
+}
