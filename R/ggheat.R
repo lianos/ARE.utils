@@ -39,7 +39,7 @@ ggheat <- function(m, rescaling=c('none', 'row', 'column'),
   ## you can either scale by row or column not both! 
   ## if you wish to scale by both or use a differen scale method then simply supply a scale
   ## function instead NB scale is a base funct
-  if(is.function(rescaling)) { 
+  if (is.function(rescaling)) { 
     m <- rescaling(m)
   } else {
     rescaling <- match.arg(rescaling)
