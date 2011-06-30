@@ -27,7 +27,6 @@ hyperG <- function(picked, special, universe, alternative='greater',
     m <- matrix(c(white.picked, white.total - white.picked,
                   black.picked, black.total - black.picked),
                 nrow=2, byrow=TRUE)
-                     
     pval <- fisher.test(m, alternative=alternative)$p.value
   } else {
     if (alternative == 'greater') {

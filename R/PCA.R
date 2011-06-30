@@ -17,7 +17,8 @@ plotPCA <- function(object, groups=NULL, groupnames=NULL, addtext=NULL,
                     x.coord=NULL, y.coord=NULL, screeplot=FALSE,
                     squarepca=FALSE, pch=NULL, col=NULL, pcs=c(1,2),
                     legend=TRUE, main="Principal Components Plot",
-                    plot3d=FALSE, center=TRUE, scale.=FALSE, var.sizes=FALSE) {
+                    plot3d=FALSE, center=TRUE, scale.=FALSE, var.sizes=FALSE,
+                    ...) {
   if (length(pcs) != 2 && !plot3d) {
     stop("You can only plot two principal components.\n", call. = FALSE)
   }
@@ -94,6 +95,9 @@ plotPCA <- function(object, groups=NULL, groupnames=NULL, addtext=NULL,
       cat(paste("Sometimes rgl doesn't plot the first time.\nIf there",
                 "isn't anything in the plotting window, close it and",
                 "re-run plotPCA().\n"))
+      if (!is.null(addtext)) {
+        text3d(pca$x[,pcs], texts=addtext)
+      }
     } else {
       if (squarepca) {
         ylim <- max(abs(range(pca$x[,pcs[1]])))
