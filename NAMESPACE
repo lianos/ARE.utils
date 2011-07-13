@@ -1,127 +1,129 @@
 import("igraph")
 
-export(
+exportPattern("^[^\\.]")
+
+# export(
   # bioformats
-  gff.read,
-  gff.getAttributeField,
-  gtf.read,
-  gtf.getAttributeField,
+  # gff.read,
+  # gff.getAttributeField,
+  # gtf.read,
+  # gtf.getAttributeField,
   
   # config
-  rconfig,
+  # rconfig,
   
   # datasets
-  trim.data,
-  create.densities,
+  # trim.data,
+  #   create.densities,
   
   # finance
-  stockHistory,
-  plotStocks,
+  # stockHistory,
+  # plotStocks,
   
   # general
-  dopar,
-  ':=',
-  swap,
-  filter.na,
-  match.dim,
-  dim.names,
-  whos,
-  wideScreen,
+  # dopar,
+  # ':=',
+  # swap,
+  # filter.na,
+  # match.dim,
+  # dim.names,
+  # whos,
+  # wideScreen,
   
   # igraph
-  head.igraph.es,
-  degree,
-  graph.laplacian,
-  serialize.cytoscape.node.attributes,
-  serialize.cytoscape,
-  load.cytoscape.edgelist,
-  normalize.edge.weights,
-  graph.rename.vertices,
-  graph.randomize.edges,
-  nuke.islands,
+  # head.igraph.es,
+  # degree,
+  # graph.laplacian,
+  # serialize.cytoscape.node.attributes,
+  # serialize.cytoscape,
+  # load.cytoscape.edgelist,
+  # normalize.edge.weights,
+  # graph.rename.vertices,
+  # graph.randomize.edges,
+  # nuke.islands,
   
   # glmnet
-  mycv.glmnet,
-  plot.cv.error.glmnet,
-  plot.cv.lambda.glmnet,
+  # mycv.glmnet,
+  # plot.cv.error.glmnet,
+  # plot.cv.lambda.glmnet,
   
   # gostats
-  do.gostats,
+  # do.gostats,
   
   # learning
   # createFolds,
-  accuracy,
+  # accuracy,
   
   # list
-  extractEmbeddedLists,
+  # extractEmbeddedLists,
   
   # matrix
-  which.max,
-  which.max.default,
-  which.max.matrix,
-  which.min,
-  which.min.default,
-  which.min.matrix,
-  ind2sub,
-  sub2ind,
-  matrix.power,
-  "%^%",
-  ident,
-  eye,
-  replace.na,
+  # which.max,
+  # which.max.default,
+  # which.max.matrix,
+  # which.min,
+  # which.min.default,
+  # which.min.matrix,
+  # ind2sub,
+  # sub2ind,
+  # matrix.power,
+  # "%^%",
+  # ident,
+  # eye,
+  # replace.na,
   
   # packages
-  installedPackages,
-  reloadPackages,
-  libLoaded,
-  sourceDir,
+  # installedPackages,
+  # reloadPackages,
+  # libLoaded,
+  # sourceDir,
   # source,
   
   # reports.moin
-  moin.table,
+  # moin.table,
   
   # stats
-  standardizeData,
-  evalMse,
-  evalR2,
-  evalSpearman,
-  regressionPerformance,
-  z.transform,
-  z.score,
-  dhist,
+  # standardizeData,
+  # evalMse,
+  # evalR2,
+  # evalSpearman,
+  # regressionPerformance,
+  # z.transform,
+  # z.score,
+  # dhist,
   
   # strings
-  strip.slashes,
-  strip.whitespace,
-  string.startswith,
-  string.endswith,
+  # strip.slashes,
+  # strip.whitespace,
+  # string.startswith,
+  # string.endswith,
   
   # test
-  almost.equal,
-  '%~%',
-  upper.tri.equal,
+  # almost.equal,
+  #  '%~%',
+  #  upper.tri.equal,
   
   # test.framework
-  initTestEnvironment,
-  doTest,
-  fail,
-  testReport,
-  runTests,
+  # initTestEnvironment,
+  # doTest,
+  # fail,
+  # testReport,
+  # runTests,
   
   # vector
-  trimVectors,
-  padVectors,
-  createMap,
+  # trimVectors,
+  # padVectors,
+  # createMap,
   
   # visuals
-  heatmap.22,
-  palette.two.color,
-  palette.two.colorRamp,
-  palette.three.color,
-  palette.gr.marray,
-  palette.by.marray,
-  my.image.matrix,
-  plot.densities,
-  add.error.bars,
-  calendarHeat
-)
+  # heatmap.22,
+  # palette.two.color,
+  # palette.two.colorRamp,
+  # palette.three.color,
+  # palette.gr.marray,
+  # palette.by.marray,
+  # my.image.matrix,
+  # plot.densities,
+  # add.error.bars,
+  # calendarHeat
+# )

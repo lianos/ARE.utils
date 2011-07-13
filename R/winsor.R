@@ -1,5 +1,3 @@
-## Taken from: http://www.portfolioprobe.com/2011/06/30/winsorization
-
 ##' Another way to trim data (without triming)
 ##'
 ##' This function was taken from here:
