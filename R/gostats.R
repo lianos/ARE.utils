@@ -31,7 +31,11 @@ do.goReport <- function(genes, universe, ontologies=c('BP', 'MF', 'CC'),
                testDirection=testDirection)
   }
   names(gos) <- ontologies
-
+  
+  if (length(grep("\\.html?$", report.name) == 0L)) {
+    report.name <- paste(report.name, 'html', sep='.')
+  }
+  
   html.out <- file.path(path, report.name)
   if (verbose) {
     cat("Creating HTML report to:", html.out, "\n")

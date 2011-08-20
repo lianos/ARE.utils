@@ -85,7 +85,10 @@ plot.densities <- function(..., along=2, density.params=list(),
   do.call(plot, c(list(data[[1]]), plot.params))
   if (length(data) > 1) {
     for (idx in 2:length(data)) {
-      lines(data[[idx]], col=plot.params$col[idx])
+      rm.params <- c('main', 'xlab', 'ylab')
+      line.params <- plot.params[!names(plot.params) %in% rm.params]
+      line.params$col <- plot.params$col[idx]
+      do.call(lines, c(list(data[[idx]]), line.params))
     }
   }
   
