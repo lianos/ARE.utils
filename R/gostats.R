@@ -22,7 +22,7 @@ do.goReport <- function(genes, universe, ontologies=c('BP', 'MF', 'CC'),
   genes <- unique(as.character(genes))
   universe <- union(genes, as.character(universe))
   
-  gos <- lapply(ontologies, function(ontoloty) {
+  gos <- lapply(ontologies, function(ontology) {
     if (verbose) {
       cat("...", ontology, "\n")
     }
