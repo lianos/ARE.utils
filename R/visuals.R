@@ -22,6 +22,7 @@ my.image.matrix <- function(m, ...) {
 
 # image.tf.parents.cexp <- function() {}
 
+## TODO: use sm.densities?
 plot.densities <- function(..., along=2, density.params=list(), 
                            plot.params=list(), legend=NULL,
                            na.rm=TRUE) {

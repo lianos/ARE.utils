@@ -21,15 +21,15 @@ do.goReport <- function(genes, universe, ontologies=c('BP', 'MF', 'CC'),
                         report.name="GO-report.html", verbose=FALSE) {
   genes <- unique(as.character(genes))
   universe <- union(genes, as.character(universe))
-
-  gos <- foreach(ontology=ontologies, .packages='GOstats') %dopar% {
+  
+  gos <- lapply(ontologies, function(ontoloty) {
     if (verbose) {
       cat("...", ontology, "\n")
     }
     do.gostats(genes, universe, conditional=conditional, p.value=p.value,
                ontology=ontology, annotation=annotation,
                testDirection=testDirection)
-  }
+  })
   names(gos) <- ontologies
   
   if (length(grep("\\.html?$", report.name) == 0L)) {
