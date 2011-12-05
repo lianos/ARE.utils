@@ -25,7 +25,7 @@ my.image.matrix <- function(m, ...) {
 ## TODO: use sm.densities?
 plot.densities <- function(..., along=2, density.params=list(), 
                            plot.params=list(), legend=NULL,
-                           na.rm=TRUE) {
+                           na.rm=TRUE, main="Densities") {
   # Plot the densities from many examples into one plot.
   # Returns the densities used as a list.
   # 
@@ -77,7 +77,7 @@ plot.densities <- function(..., along=2, density.params=list(),
     plot.params$xlim <- c(x.min, x.max)
   }
   if (is.null(plot.params$main)) {
-    plot.params$main <- ''
+    plot.params$main <- main
   }
   if (is.null(plot.params$ylab)) {
     plot.params$ylab <- "Density"
