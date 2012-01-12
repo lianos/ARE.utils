@@ -398,7 +398,7 @@ breakColors <- function(breaks, colors, center=0, tol=0.001,
     nneg <- sum(breaks < center)
     npos <- sum(breaks > center)
     ratio <- min(c(nneg, npos)) / max(c(nneg, npos))
-    is.symmetric <- isTRUE(symmkey) || (ratio > .25 && ratio < .78)
+    is.symmetric <- isTRUE(symkey) || (ratio > .25 && ratio < .78)
 
     if (is.symmetric) { ## yes, symmetric
       ndxcen <- which(breaks==center)
@@ -809,7 +809,7 @@ myAnnHeatmap2 <- function(x, dendrogram, annotation, cluster, labels,
     ## Construct the breaks and colors for display
     ## breaks = niceBreaks(range(x2), breaks) ## steve
     breaks <- niceBreaks(extremes, breaks, symbreaks=symbreaks) ## steve
-    col <- breakColors(breaks, col, symkey=symmkey)
+    col <- breakColors(breaks, col, symkey=symkey)
 
     ## Generate the dendrograms, if required; re-indexes in any cases
     ## We could put some sanity checks on the dendrograms in the else-branches
@@ -847,15 +847,15 @@ myAnnHeatmap2 <- function(x, dendrogram, annotation, cluster, labels,
     colInd <- with(dendrogram$Col, {
       if (status != "no") order.dendrogram(dendro) else 1:nc
     })
-    x2 = x2[rowInd, colInd]
+    x2 <- x2[rowInd, colInd]
 
     ## Set the defaults for the sample/variable labels
-    labels$Row = within(labels$Row, {
+    labels$Row <- within(labels$Row, {
         if (is.null(cex)) cex = 0.2 + 1/log10(nr)
         if (is.null(side)) side = if (is.null(annotation$Row$data)) 4 else 2
         if (is.null(labels)) labels = rownames(x2)
     })
-    labels$Col = within(labels$Col, {
+    labels$Col <- within(labels$Col, {
         if (is.null(cex)) cex = 0.2 + 1/log10(nc)
         if (is.null(side)) side = if (is.null(annotation$Col$data)) 1 else 3
         if (is.null(labels)) labels = colnames(x2)
@@ -863,20 +863,20 @@ myAnnHeatmap2 <- function(x, dendrogram, annotation, cluster, labels,
 
     ## Generate the clustering, if required (cut, or resort the cluster var)
     ## FIXME: does not deal with pre-defined grp form outside
-    cluster$Row = within(cluster$Row,
+    cluster$Row <- within(cluster$Row,
         if (!is.null(cuth) && (cuth > 0)) {
             grp = cutree.dendrogram(dendrogram$Row$dendro, cuth)[rowInd]
         })
-    cluster$Col = within(cluster$Col,
+    cluster$Col <- within(cluster$Col,
         if (!is.null(cuth) && (cuth > 0)) {
             grp = cutree.dendrogram(dendrogram$Col$dendro, cuth)[colInd]
         })
 
     ## Process the annotation data frames (factor/numeric, re-sort?)
-    annotation$Row = within(annotation$Row, {
+    annotation$Row <- within(annotation$Row, {
         data = convAnnData(data, asIs=asIs, inclRef=inclRef)
     })
-    annotation$Col = within(annotation$Col, {
+    annotation$Col <- within(annotation$Col, {
         data = convAnnData(data, asIs=asIs, inclRef=inclRef)
     })
 
@@ -905,8 +905,8 @@ myAnnHeatmap2 <- function(x, dendrogram, annotation, cluster, labels,
 ##  plot(x, umi=list(loess=FALSE))
 plot.annHeatmap <- function(x, widths, heights, main=NULL, ...)
 {
-    opar <- par()
-    on.exit(suppressWarnings(par(opar)))
+    ## opar <- par()
+    ## on.exit(suppressWarnings(par(opar)))
     ## Set up the layout
     if (!missing(widths)) x$layout$width = widths
     if (!missing(heights)) x$layout$height = heights
@@ -990,7 +990,9 @@ hm <- function(x, annotation=NULL,
                dendrogram=list(clustfun=hclust, distfun=dist, order="optimal"),
                cluster=NULL, labels=NULL, legend=TRUE, scale="row",
                symbreaks=min(x, na.rm=TRUE) < 0 & max(x, na.rm=TRUE) > 0,
-               symkey=symbreaks, ...) {
+               symkey=symbreaks, extremes=c(0.05, 0.95),
+               extremes.are=c('quantiles', 'values'),
+               na.action=0, ...) {
   if (!is.null(annotation)) {
     ## dendrogram$Col <- list(status="yes")
     ## dendrogram$Row <- list(status="hidden")
@@ -1010,7 +1012,9 @@ hm <- function(x, annotation=NULL,
   col <- args$col
   ret <- myAnnHeatmap2(x, dendrogram=dendrogram, annotation=annotation,
                        cluster=cluster, labels=labels, legend=legend, col=col,
-                       scale=scale, symmkey=symmkey, symmbreaks=symmbreaks)
+                       scale=scale, symkey=symkey, symbreaks=symbreaks,
+                       extremes=extremes, extremes.are=extremes.are,
+                       na.action=na.action)
   ret
 }
 
@@ -1073,9 +1077,9 @@ if (FALSE) {
   rwb.ramp <- colorRampPalette(c(red, light.grey, blue))
 
   ## is colorbar sckewed?
-  pop.1 <- matrix(rnorm(500, 5), ncol=10)
+  pop.1 <- matrix(rnorm(500, 2, 4), ncol=10)
   pop.2 <- matrix(rnorm(100, 0), ncol=10)
   M <- rbind(pop.1, pop.2)
 
-  plot(hm(rbind(pop.1, pop.2), col=bwr.ramp, scale="none"))
+  plot(hm(M, col=bwr.ramp, scale="none", extremes=c(0.01, .1)))
 }
