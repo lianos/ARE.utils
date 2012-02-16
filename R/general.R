@@ -1,9 +1,19 @@
+fail.with <- function(default=NULL, expr, quiet=FALSE) {
+  if (quiet) {
+    result <- tryCatch(eval(expr, parent.frame()), error=function(e) default)
+  } else {
+    result <- default
+    try(result <- eval(expr, parent.frame()))
+  }
+  result
+}
+
 dopar <- function(what, backend=c('doMC')) {
   backend <- match.arg(backend)
   if (!libLoaded(backend)) library(backend, character.only=TRUE)
-  
+
   if (missing(what)) {
-    cat("Using", getDoParName(), "backend with", getDoParWorkers(), 
+    cat("Using", getDoParName(), "backend with", getDoParWorkers(),
         ifelse(getDoParWorkers() == 1, "worker", "workers"), "\n")
   } else {
     if (is.logical(what)) {
@@ -117,7 +127,7 @@ whos <- function(pattern='*', show.memory=TRUE, ENV=.GlobalEnv) {
       !is(thing, 'try-error') && !is.function(thing)
     }, ls(parent.frame(), pattern=utils:::glob2rx(pattern)))
   }
-  
+
   if (length(things) == 0) {
     cat("No items in workspace\n");
   } else {
@@ -132,7 +142,7 @@ whos <- function(pattern='*', show.memory=TRUE, ENV=.GlobalEnv) {
         paste(classes[idx], type, sep='/')
       }
     }, USE.NAMES=FALSE)
-    
+
     sizes <- sapply(1:length(classes), function (idx) {
       obj <- get(things[idx], env=ENV)
       if (classes[idx] %in% c('matrix', 'data.frame')) {
@@ -141,9 +151,9 @@ whos <- function(pattern='*', show.memory=TRUE, ENV=.GlobalEnv) {
         length(obj)
       }
     }, USE.NAMES=FALSE)
-    
+
     d <- data.frame(var=things, type=types, size=sizes, stringsAsFactors=FALSE)
-    
+
     if (show.memory) {
       memory <- sapply(1:length(classes), function (idx) {
         obj <- get(things[idx], env=ENV)
@@ -161,7 +171,7 @@ whos <- function(pattern='*', show.memory=TRUE, ENV=.GlobalEnv) {
       })
       d$memory <- memory
     }
-    
+
     show(d)
     invisible(d)
   }
@@ -169,14 +179,14 @@ whos <- function(pattern='*', show.memory=TRUE, ENV=.GlobalEnv) {
 
 ###############################################################################
 # which.duplicated
-if (!isGeneric("which.duplicated")) { 
-  if (is.function("which.duplicated")) { 
+if (!isGeneric("which.duplicated")) {
+  if (is.function("which.duplicated")) {
     fun <- which.duplicated
-  } else { 
-    fun <- function(object, ...) standardGeneric("which.duplicated") 
-  } 
-  setGeneric("which.duplicated",fun) 
-} 
+  } else {
+    fun <- function(object, ...) standardGeneric("which.duplicated")
+  }
+  setGeneric("which.duplicated",fun)
+}
 
 if (!existsMethod('which.duplicated', 'matrix')) {
   setMethod('which.duplicated', 'matrix', function(object, ...) {

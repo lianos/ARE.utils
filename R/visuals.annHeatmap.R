@@ -334,7 +334,6 @@ picketPlot <- function (x, grp=NULL, grpcol, grplabel=NULL, horizontal=TRUE,
 ###################################################
 #line 379 "Heatplus/inst/doc/annHeatmapCommentedSource.Rnw"
 niceBreaks <- function(xr, breaks, symbreaks=min(xr) < 0 & max(xr) > 0) {
-  ## browser()
   ## If you want it, you get it
   if (length(breaks) > 1) {
     return(breaks)
@@ -1004,9 +1003,9 @@ hm <- function(x, annotation=NULL,
     if (isTRUE(legend)) {
       legend <- 4
     }
-  } else {
-    dendrogram$status <- "yes"
-  }
+  }## else {
+   ## dendrogram$status <- "yes"
+  ##}
 
   args <- list(...)
   col <- args$col
@@ -1081,5 +1080,5 @@ if (FALSE) {
   pop.2 <- matrix(rnorm(100, 0), ncol=10)
   M <- rbind(pop.1, pop.2)
 
-  plot(hm(M, col=bwr.ramp, scale="none", extremes=c(0.01, .1)))
+  plot(hm(M, col=bwr.ramp, scale="none", extremes=c(0.05, .5)))
 }
