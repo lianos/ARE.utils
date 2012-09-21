@@ -32,30 +32,30 @@ dopar <- function(what, backend=c('doMC')) {
   invisible(getDoParWorkers() > 1)
 }
 
-':=' <- function(lhs, rhs) {
-  # Taken from: http://code.google.com/p/miscell/source/browse/rvalues/rvalues.r
-  # Who the hell knew you could do this?
-  #   c(a,b,c) := c(1,2,3)
-  frame <- parent.frame()
-  lhs <- as.list(substitute(lhs))
-  if (length(lhs) > 1) {
-    lhs <- lhs[-1]
-  }
-  if (length(lhs) == 1) {
-    do.call(`=`, list(lhs[[1]], rhs), envir=frame)
-    return(invisible(NULL))
-  }
-  if (is.function(rhs) || is(rhs, 'formula')) {
-    rhs <- list(rhs)
-  }
-  if (length(lhs) > length(rhs)) {
-    rhs <- c(rhs, rep(list(NULL), length(lhs) - length(rhs)))
-  }
-  for (i in 1:length(lhs)) {
-    do.call(`=`, list(lhs[[i]], rhs[[i]]), envir=frame)
-  }
-  return(invisible(NULL))
-}
+## ':=' <- function(lhs, rhs) {
+##   # Taken from: http://code.google.com/p/miscell/source/browse/rvalues/rvalues.r
+##   # Who the hell knew you could do this?
+##   #   c(a,b,c) := c(1,2,3)
+##   frame <- parent.frame()
+##   lhs <- as.list(substitute(lhs))
+##   if (length(lhs) > 1) {
+##     lhs <- lhs[-1]
+##   }
+##   if (length(lhs) == 1) {
+##     do.call(`=`, list(lhs[[1]], rhs), envir=frame)
+##     return(invisible(NULL))
+##   }
+##   if (is.function(rhs) || is(rhs, 'formula')) {
+##     rhs <- list(rhs)
+##   }
+##   if (length(lhs) > length(rhs)) {
+##     rhs <- c(rhs, rep(list(NULL), length(lhs) - length(rhs)))
+##   }
+##   for (i in 1:length(lhs)) {
+##     do.call(`=`, list(lhs[[i]], rhs[[i]]), envir=frame)
+##   }
+##   return(invisible(NULL))
+## }
 
 swap <- function(a,b) {
   frame <- parent.frame()

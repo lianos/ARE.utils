@@ -987,7 +987,8 @@ plot.annHeatmap <- function(x, widths, heights, main=NULL, ...)
 
 hm <- function(x, annotation=NULL,
                dendrogram=list(clustfun=hclust, distfun=dist, order="optimal"),
-               cluster=NULL, labels=NULL, legend=TRUE, scale="row",
+               cluster=NULL, labels=NULL, legend=TRUE, scale="row", breaks=256,
+               col=g2r.colors,
                symbreaks=min(x, na.rm=TRUE) < 0 & max(x, na.rm=TRUE) > 0,
                symkey=symbreaks, extremes=c(0.05, 0.95),
                extremes.are=c('quantiles', 'values'),
@@ -1007,13 +1008,11 @@ hm <- function(x, annotation=NULL,
    ## dendrogram$status <- "yes"
   ##}
 
-  args <- list(...)
-  col <- args$col
   ret <- myAnnHeatmap2(x, dendrogram=dendrogram, annotation=annotation,
                        cluster=cluster, labels=labels, legend=legend, col=col,
                        scale=scale, symkey=symkey, symbreaks=symbreaks,
                        extremes=extremes, extremes.are=extremes.are,
-                       na.action=na.action)
+                       na.action=na.action, breaks=breaks)
   ret
 }
 

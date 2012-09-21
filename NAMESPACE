@@ -1,4 +1,4 @@
-import("igraph")
+## import("igraph")
 
 exportPattern("^[^\\.]")
 
@@ -8,18 +8,18 @@ exportPattern("^[^\\.]")
   # gff.getAttributeField,
   # gtf.read,
   # gtf.getAttributeField,
-  
+
   # config
   # rconfig,
-  
+
   # datasets
   # trim.data,
   #   create.densities,
-  
+
   # finance
   # stockHistory,
   # plotStocks,
-  
+
   # general
   # dopar,
   # ':=',
@@ -29,7 +29,7 @@ exportPattern("^[^\\.]")
   # dim.names,
   # whos,
   # wideScreen,
-  
+
   # igraph
   # head.igraph.es,
   # degree,
@@ -41,22 +41,22 @@ exportPattern("^[^\\.]")
   # graph.rename.vertices,
   # graph.randomize.edges,
   # nuke.islands,
-  
+
   # glmnet
   # mycv.glmnet,
   # plot.cv.error.glmnet,
   # plot.cv.lambda.glmnet,
-  
+
   # gostats
   # do.gostats,
-  
+
   # learning
   # createFolds,
   # accuracy,
-  
+
   # list
   # extractEmbeddedLists,
-  
+
   # matrix
   # which.max,
   # which.max.default,
@@ -71,17 +71,17 @@ exportPattern("^[^\\.]")
   # ident,
   # eye,
   # replace.na,
-  
+
   # packages
   # installedPackages,
   # reloadPackages,
   # libLoaded,
   # sourceDir,
   # source,
-  
+
   # reports.moin
   # moin.table,
-  
+
   # stats
   # standardizeData,
   # evalMse,
@@ -91,30 +91,30 @@ exportPattern("^[^\\.]")
   # z.transform,
   # z.score,
   # dhist,
-  
+
   # strings
   # strip.slashes,
   # strip.whitespace,
   # string.startswith,
   # string.endswith,
-  
+
   # test
   # almost.equal,
   #  '%~%',
   #  upper.tri.equal,
-  
+
   # test.framework
   # initTestEnvironment,
   # doTest,
   # fail,
   # testReport,
   # runTests,
-  
+
   # vector
   # trimVectors,
   # padVectors,
   # createMap,
-  
+
   # visuals
   # heatmap.22,
   # palette.two.color,

@@ -1,5 +1,6 @@
 ## Wrapper for functions for doing gene ontology enrichment tests using
 ## GOstats
+library(GOstats)
 ##
 ## Help with GO in R:
 ##   http://www.economia.unimi.it/projects/marray/2007/material/day4/Lecture7.pdf
@@ -32,7 +33,7 @@ do.goReport <- function(genes, universe, ontologies=c('BP', 'MF', 'CC'),
   })
   names(gos) <- ontologies
   
-  if (length(grep("\\.html?$", report.name) == 0L)) {
+  if (length(grep("\\.html?$", report.name)) == 0L) {
     report.name <- paste(report.name, 'html', sep='.')
   }
   
@@ -205,6 +206,6 @@ go.htmlReport <- function(result, p.value=pvalueCutoff(result), file="",
   dig[5:7] <- 0
   xt <- xtable(df, caption=paste(testName(result), collapse="/"), digits=dig)
   print(xt, type="html", file=file, append=append, caption.placement='top',
-        sanitize.text.function=function(x) x, include.rownames=FALSE)
+        sanitize.text.function=identity, include.rownames=FALSE)
   invisible(list(xtable=xt, df=df))
 }

@@ -25,7 +25,8 @@ my.image.matrix <- function(m, ...) {
 ## TODO: use sm.densities?
 plot.densities <- function(..., along=2, density.params=list(),
                            plot.params=list(), legend=NULL,
-                           na.rm=TRUE, main="Densities") {
+                           xlab=NULL, ylab=NULL, xlim=NULL, ylim=NULL,
+                           col=NULL, na.rm=TRUE, main="Densities") {
   # Plot the densities from many examples into one plot.
   # Returns the densities used as a list.
   #
@@ -74,7 +75,9 @@ plot.densities <- function(..., along=2, density.params=list(),
     legend <- legend[keep]
   }
 
-  col <- rainbow(sum(keep))
+  if (is.null(col)) {
+    col <- rainbow(sum(keep))
+  }
   if (is.character(plot.params$col)) {
     if (length(col) != length(keep)) {
       warning("Colors do not match data length, using rainbow")
@@ -84,15 +87,30 @@ plot.densities <- function(..., along=2, density.params=list(),
   }
   plot.params$col <- col
 
+  if (!is.null(ylim) && is.null(plot.params$ylim)) {
+    plot.params$ylim <- ylim
+  }
   if (is.null(plot.params$ylim)) {
     y.max <- max(unlist(lapply(data, function (d) max(d$y))))
     plot.params$ylim <- c(0, y.max)
+  }
+
+  if (!is.null(xlim) && is.null(plot.params$xlim)) {
+    plot.params$xlim <- xlim
   }
   if (is.null(plot.params$xlim)) {
     x.min <- min(unlist(lapply(data, function (d) min(d$x))))
     x.max <- max(unlist(lapply(data, function (d) max(d$x))))
     plot.params$xlim <- c(x.min, x.max)
   }
+
+  if (!is.null(xlab) && is.null(plot.params$xlab)) {
+    plot.params$xlab <- xlab
+  }
+  if (!is.null(ylab) && is.null(plot.params$ylab)) {
+    plot.params$ylab <- ylab
+  }
+
   if (is.null(plot.params$main)) {
     plot.params$main <- main
   }
@@ -119,6 +137,81 @@ plot.densities <- function(..., along=2, density.params=list(),
 
   invisible(data)
 }
+
+plot.ecdfs <- function(..., col=rainbow(length(data)),
+                       along=2, legend=NULL, lwd=2,
+                       legend.pos='bottomright',
+                       density.params=list(), main="CDFs",
+                       smooth=TRUE, smooth.f=0.1,
+                       xpts=NULL, xlim=NULL,
+                       xlab="XXX", ylab="Cumulative fraction",
+                       draw.limits=TRUE) {
+  data <- list(...)
+  if (is.null(labels)) {
+    labels <- names(data)
+  }
+  if (all(sapply(data, is, 'ecdf'))) {
+    data <- data
+  } else if (is.list(data[[1]]) && all(sapply(data[[1]], is, 'ecdf'))) {
+    data <- data[[1]]
+  } else {
+    along <- match.dim(along)
+    data <- create.ecdfs(..., along=along, density.params=density.params)
+  }
+  keep <- sapply(data, is, 'ecdf')
+  if (!any(keep)) {
+    stop("All items passed in created empty densities")
+  }
+
+  data <- data[keep]
+
+  # for (i in 1:length(data)) {
+  #   ECDF <- data[[i]]
+  #   ## xx <- if (is.null(xpts)) knots(ECDF) else xpts
+  #   if (is.null(xpts)) {
+  #     xx <- knots(ECDF)
+  #   } else {
+  #     xx <- xpts
+  #   }
+  #
+  #   yy <- ECDF(xx)
+  #   if (smooth) {
+  #     yy <- lowess(xx, yy, f=smooth.f)$y
+  #   }
+  #   if (i == 1) {
+  #     if (is.null(xlim)) {
+  #       xlim <- range(xx)
+  #     }
+  #     plot(xx, yy, col=col[i], lwd=lwd, main=main, type='l',
+  #          xlim=xlim, ylim=c(0, 1), xlab=xlab, ylab=ylab)
+  #   } else {
+  #     lines(xx, yy, col=col[i], lwd=lwd)
+  #   }
+  # }
+  for (i in 1:length(data)) {
+    ECDF <- data[[i]]
+    if (missing(xlim) || is.null(xlim)) {
+      plot(ECDF, add=i > 1, do.points=FALSE, col=col[i],
+           lwd=lwd, verticals=TRUE, main=main, xlab=xlab,
+           ylab=ylab, ylim=c(0,1))
+    } else {
+      plot(ECDF, add=i > 1, do.points=FALSE, col=col[i],
+           lwd=lwd, verticals=TRUE, main=main, xlab=xlab,
+           ylab=ylab, xlim=xlim, ylim=c(0,1))
+    }
+  }
+
+  if (!is.null(labels)) {
+    legend(legend.pos, legend=legend, text.col=col)
+  }
+
+  # if (draw.limits) {
+  #   abline(h=c(0, 1), lty='dashed', col='grey')
+  # }
+
+  invisible(data)
+}
+
 
 add.error.bars <- function(x, y, error, lower=NULL, upper=NULL,
                            width=1/length(x), plot.it=TRUE, ...) {

@@ -1,22 +1,26 @@
-heatmap.3 <- function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE, 
-    distfun = dist, hclustfun = hclust, dendrogram = c("both", 
-        "row", "column", "none"), symm = FALSE, scale = c("none", 
-        "row", "column"), na.rm = TRUE, revC = identical(Colv, 
-        "Rowv"), add.expr, breaks, symbreaks = min(x, na.rm = TRUE) < 0 || 
-        scale != "none", col = "heat.colors", colsep, rowsep, 
-    sepcolor = "white", sepwidth = c(0.05, 0.05), cellnote, notecex = 1, 
-    notecol = "cyan", na.color = par("bg"), trace = c("column", 
-        "row", "both", "none"), tracecol = "cyan", hline = median(breaks), 
-    vline = median(breaks), linecol = tracecol, margins = c(5, 
-        5), ColSideColors, RowSideColors, cexRow = 0.2 + 1/log10(nr), 
-    cexCol = 0.2 + 1/log10(nc), labRow = NULL, labCol = NULL, 
-    key = TRUE, keysize = 1.5, density.info = c("histogram", 
-        "density", "none"), denscol = tracecol,
-        symkey = min(x, na.rm = TRUE) < 0 || symbreaks, densadj = 0.25, main = NULL, 
-    xlab = NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid = NULL,
-    NumColSideColors = 1, NumRowSideColors = 1, KeyValueName="Value",
-    ...) 
-{
+##' Plot a heatmap with multipe side colors
+##' 
+##' Courtesy of Obi Griffith:
+##'   http://biostar.stackexchange.com/questions/18258
+heatmap.3 <- function (x, Rowv=TRUE, Colv=if (symm) "Rowv" else TRUE,
+                       distfun=dist, hclustfun=hclust,
+                       dendrogram=c("both", "row", "column", "none"),
+                       symm=FALSE, scale=c("none", "row", "column"),
+                       na.rm=TRUE, revC=identical(Colv, "Rowv"), add.expr,
+                       breaks, symbreaks=min(x, na.rm=TRUE) < 0 || scale != "none",
+                       col="heat.colors", colsep, rowsep, sepcolor="white",
+                       sepwidth=c(0.05, 0.05), cellnote, notecex=1, 
+                       notecol="cyan", na.color=par("bg"), 
+                       trace=c("none", "column", "row", "both"), tracecol="cyan",
+                       hline=median(breaks), vline=median(breaks), linecol=tracecol,
+                       margins=c(5, 5), ColSideColors, RowSideColors,
+                       cexRow=0.2 + 1/log10(nr), cexCol=0.2 + 1/log10(nc),
+                       labRow=NULL, labCol=NULL, key=TRUE, keysize=1.5,
+                       density.info = c("histogram", "density", "none"),
+                       denscol=tracecol, symkey=min(x, na.rm=TRUE) < 0 || symbreaks,
+                       densadj=0.25, main=NULL, xlab=NULL, ylab=NULL, lmat=NULL,
+                       lhei=NULL, lwid=NULL, NumColSideColors=1, NumRowSideColors=1,
+                       KeyValueName="Value",...) {
     scale01 <- function(x, low = min(x), high = max(x)) {
         x <- (x - low)/(high - low)
         x
@@ -186,93 +190,84 @@ heatmap.3 <- function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
     if (missing(lwid) || is.null(lwid)) 
         lwid <- c(keysize, 4)
     if (missing(lmat) || is.null(lmat)) {
-        lmat <- rbind(4:3, 2:1)
+      lmat <- rbind(4:3, 2:1)
 
-     if (!missing(ColSideColors)) {
-       #if (!is.matrix(ColSideColors)) 
-       #stop("'ColSideColors' must be a matrix")
-        if (!is.character(ColSideColors) || dim(ColSideColors)[1] != 
-            nc) 
-            stop("'ColSideColors' dim()[2] must be of length ncol(x)")
+      if (!missing(ColSideColors)) {
+        #if (!is.matrix(ColSideColors)) 
+        #stop("'ColSideColors' must be a matrix")
+        if (!is.character(ColSideColors) || dim(ColSideColors)[1] != nc) 
+          stop("'ColSideColors' dim()[2] must be of length ncol(x)")
         lmat <- rbind(lmat[1, ] + 1, c(NA, 1), lmat[2, ] + 1)
         #lhei <- c(lhei[1], 0.2, lhei[2])
-         lhei=c(lhei[1], 0.1*NumColSideColors, lhei[2]) 
-    }
-
-        if (!missing(RowSideColors)) {
-       #if (!is.matrix(RowSideColors)) 
-       #stop("'RowSideColors' must be a matrix")
-        if (!is.character(RowSideColors) || dim(RowSideColors)[1] != 
-            nr) 
-            stop("'RowSideColors' must be a character vector of length nrow(x)")
+        lhei=c(lhei[1], 0.1*NumColSideColors, lhei[2]) 
+      }
+      
+      if (!missing(RowSideColors)) {
+        #if (!is.matrix(RowSideColors)) 
+        #stop("'RowSideColors' must be a matrix")
+        if (!is.character(RowSideColors) || dim(RowSideColors)[1] != nr) 
+          stop("'RowSideColors' must be a character vector of length nrow(x)")
         lmat <- cbind(lmat[, 1] + 1, c(rep(NA, nrow(lmat) - 1), 1), lmat[,2] + 1)
         #lwid <- c(lwid[1], 0.2, lwid[2])
         lwid <- c(lwid[1], 0.1*NumRowSideColors, lwid[2])
+      }
+      lmat[is.na(lmat)] <- 0     
     }
-    lmat[is.na(lmat)] <- 0     
-}
     if (length(lhei) != nrow(lmat))
-
-        stop("lhei must have length = nrow(lmat) = ", nrow(lmat))
+      stop("lhei must have length = nrow(lmat) = ", nrow(lmat))
     if (length(lwid) != ncol(lmat))
-        stop("lwid must have length = ncol(lmat) =", ncol(lmat))
+      stop("lwid must have length = ncol(lmat) =", ncol(lmat))
     op <- par(no.readonly = TRUE)
     on.exit(par(op))
-    layout(lmat, widths = lwid, heights = lhei, respect = FALSE)     
+    layout(lmat, widths = lwid, heights = lhei, respect = FALSE)
 
     if (!missing(RowSideColors)) {
-
-	if (!is.matrix(RowSideColors)){
-       		par(mar = c(margins[1], 0, 0, 0.5))
-        	image(rbind(1:nr), col = RowSideColors[rowInd], axes = FALSE)
-        } 
-        else{
+      if (!is.matrix(RowSideColors)) {
+        par(mar = c(margins[1], 0, 0, 0.5))
+        image(rbind(1:nr), col = RowSideColors[rowInd], axes = FALSE)
+      } else{
         par(mar = c(margins[1], 0, 0, 0.5))
         rsc = RowSideColors[rowInd, ]
         rsc.colors = matrix()
         rsc.names = names(table(rsc))
         rsc.i = 1
         for (rsc.name in rsc.names) {
-            rsc.colors[rsc.i] = rsc.name
-            rsc[rsc == rsc.name] = rsc.i
-            rsc.i = rsc.i + 1
+          rsc.colors[rsc.i] = rsc.name
+          rsc[rsc == rsc.name] = rsc.i
+          rsc.i = rsc.i + 1
         }
         rsc = matrix(as.numeric(rsc), nrow = dim(rsc)[1])
         image(t(rsc), col = as.vector(rsc.colors), axes = FALSE)
         if (length(colnames(RowSideColors)) > 0) {
-            axis(1, 0:(dim(rsc)[2] - 1)/(dim(rsc)[2] - 1),
-colnames(RowSideColors), 
-                las = 2, tick = FALSE)
-                }
+          axis(1, 0:(dim(rsc)[2] - 1) / (dim(rsc)[2] - 1),
+               colnames(RowSideColors), las=2, tick=FALSE)
         }
-}
+      }
+    }
 
     if (!missing(ColSideColors)) {
-
-        if (!is.matrix(ColSideColors)){
-        	par(mar = c(0.5, 0, 0, margins[2]))
-        	image(cbind(1:nc), col = ColSideColors[colInd], axes = FALSE)
-        }
-        else{    
-    	par(mar = c(0.5, 0, 0, margins[2]))
+      if (!is.matrix(ColSideColors)){
+        par(mar = c(0.5, 0, 0, margins[2]))
+        image(cbind(1:nc), col=ColSideColors[colInd], axes=FALSE)
+      } else {
+        par(mar = c(0.5, 0, 0, margins[2]))
         csc = ColSideColors[colInd, ]
         csc.colors = matrix()
         csc.names = names(table(csc))
         csc.i = 1
         for (csc.name in csc.names) {
-            csc.colors[csc.i] = csc.name
-            csc[csc == csc.name] = csc.i
-            csc.i = csc.i + 1
+          csc.colors[csc.i] = csc.name
+          csc[csc == csc.name] = csc.i
+          csc.i = csc.i + 1
         }
         csc = matrix(as.numeric(csc), nrow = dim(csc)[1])
         image(csc, col = as.vector(csc.colors), axes = FALSE)
         if (length(colnames(ColSideColors)) > 0) {
-            axis(2, 0:(dim(csc)[2] - 1)/(dim(csc)[2] - 1),
-colnames(ColSideColors), 
-                las = 2, tick = FALSE)
-                }
+          axis(2, 0:(dim(csc)[2] - 1) / (dim(csc)[2] - 1),
+               colnames(ColSideColors), las=2, tick=FALSE)
         }
-}
+      }
+    }
 
     par(mar = c(margins[1], 0, 0, margins[2]))
     x <- t(x)
