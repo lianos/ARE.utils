@@ -22,7 +22,7 @@ err <- function(..., sep=" ") {
 
 libs.reqd <- c('optparse', 'knitr', 'markdown')
 libs.missing <- setdiff(libs.reqd, unlist(sapply(.libPaths(), dir)))
-if (any(libs.missing)) {
+if (length(libs.missing)) {
   err("Required packages missing:", paste(libs.missing, sep=", "))
 }
 
