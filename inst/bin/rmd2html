@@ -1,0 +1,59 @@
+#!/usr/bin/env Rscript
+options(encoding='UTF-8')
+
+usage <- "usage: INFILE.Rmd [OUTBASE]
+nargs
+    Converts Rmarkdown file INFILE to OUTBASE.md then OUTBSAE.html
+"
+
+suppressPackageStartupMessages({
+  if (!require('knitr')) {
+    message("knitr required")
+    quit(save="no")
+  }
+  if (!require('markdown')) {
+    message("markdown required")
+    quit(save="no")
+  }
+})
+
+args <- commandArgs(TRUE)
+opts <- grep("^-", args)
+if (length(opts) > 0) {
+  opts <- args[opts]
+  args <- args[-opts]
+} else {
+  opts <- character()
+}
+
+nargs <- length(args)
+nopts <- length(opts)
+
+if (nargs == 0L || nargs > 2 || any(c('-h', '--help') %in% opts)) {
+  message(usage)
+  quit(save="no")
+}
+
+infile <- args[1L]
+if (!file.exists(infile)) {
+  message("Can't find input file")
+  quit(save="no")
+}
+if (!length(grep("\\.rmd$", infile, ignore.case=TRUE))) {
+  message("Input does not look like Rmarkdown file")
+  quite(save="no")
+}
+
+if (length(args) > 1) {
+  outbase <- args[2L]
+} else {
+  outbase <- gsub("\\.rmd$", "", infile, ignore.case=TRUE)
+}
+
+out.md <- paste(outbase, "md", sep=".")
+out.html <- paste(outbase, "html", sep=".")
+
+md.opts <- setdiff(markdownHTMLOptions(TRUE), 'hard_wrap')
+
+knit(infile, paste(outbase, "md", sep="."))
+markdownToHTML(out.md, out.html, options=md.opts)
