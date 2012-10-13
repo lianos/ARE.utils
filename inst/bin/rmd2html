@@ -1,47 +1,46 @@
 #!/usr/bin/env Rscript
-options(encoding='UTF-8')
+usage <- "rmd2html [OPTIONS] INFILE.Rmd [OUTBASE]
 
-usage <- "usage: INFILE.Rmd [OUTBASE]
-nargs
-    Converts Rmarkdown file INFILE to OUTBASE.md then OUTBSAE.html
-"
+  Converts Rmarkdown file INFILE to OUTBASE.md then OUTBSAE.html"
 
-suppressPackageStartupMessages({
-  if (!require('knitr')) {
-    message("knitr required")
-    quit(save="no")
-  }
-  if (!require('markdown')) {
-    message("markdown required")
-    quit(save="no")
-  }
+options(encoding='UTF-8', error=function(err) {
+  cat("\n\nAn error happened you didn't account for, exiting ...\n")
+  cat("\n\n")
+  quit(save='no', status=1)
 })
-
-args <- commandArgs(TRUE)
-opts <- grep("^-", args)
-if (length(opts) > 0) {
-  opts <- args[opts]
-  args <- args[-opts]
-} else {
-  opts <- character()
+err <- function(..., sep=" ") {
+  msg <- paste(unlist(list(...)), sep=sep)
+  cat("ERROR:", msg, "\n")
+  quit(save='no', status=1)
 }
+suppressPackageStartupMessages(if (!require(optparse)) err('optparse required'))
+
+opt.list <- list(
+  make_option(c('-f', '--force'), default=FALSE, action='store_true',
+              help=paste("Converts the document and overwrites output files",
+                         "if they already exists. If this flag is not set, ",
+                         "the script will stop if output files exist.")),
+  make_option(c('-c', '--clean'), default=FALSE, action="store_true",
+              help="If set, removes temporary *.md files")
+)
+
+parser <- OptionParser(usage=usage, option_list=opt.list)
+parsed <- parse_args(parser, positional_arguments=TRUE)
+args <- parsed$args
+opts <- parsed$options
 
 nargs <- length(args)
-nopts <- length(opts)
 
-if (nargs == 0L || nargs > 2 || any(c('-h', '--help') %in% opts)) {
-  message(usage)
-  quit(save="no")
+if (nargs == 0L || nargs > 2) {
+  err("INFILE argument required")
 }
 
 infile <- args[1L]
 if (!file.exists(infile)) {
-  message("Can't find input file")
-  quit(save="no")
+  err("Can't find input file")
 }
 if (!length(grep("\\.rmd$", infile, ignore.case=TRUE))) {
-  message("Input does not look like Rmarkdown file")
-  quite(save="no")
+  err("Input does not look like Rmarkdown file")
 }
 
 if (length(args) > 1) {
@@ -52,8 +51,22 @@ if (length(args) > 1) {
 
 out.md <- paste(outbase, "md", sep=".")
 out.html <- paste(outbase, "html", sep=".")
+if (any(file.exists(c(out.md, out.html))) && !opts$force) {
+  err("Output files already exist, I refuse to overwrite them")
+}
+
+## ----------------------------------------------------------------------------
+## Getting down to business
+suppressPackageStartupMessages({
+  if (!require('knitr')) err("knitr required")
+  if (!require('markdown')) err("markdown required")
+})
 
 md.opts <- setdiff(markdownHTMLOptions(TRUE), 'hard_wrap')
 
-knit(infile, paste(outbase, "md", sep="."))
-markdownToHTML(out.md, out.html, options=md.opts)
+knitted <- knit(infile, paste(outbase, "md", sep="."))
+written <- markdownToHTML(out.md, out.html, options=md.opts)
+
+if (opts$clean) {
+  unlink(out.md)
+}
