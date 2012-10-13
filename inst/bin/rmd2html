@@ -10,8 +10,9 @@ usage <- "rmd2html [OPTIONS] INFILE.Rmd [OUTBASE]
     * markdown"
 
 options(encoding='UTF-8', error=function(err) {
-  cat("\n\nAn error happened you didn't account for, exiting ...\n")
-  cat("\n\n")
+  banner <- paste(rep("=", 80), collapse="")
+  cat("", banner, "An error happened you didn't account for.",
+      "Exiting ...", banner, "", sep="\n")
   quit(save='no', status=1)
 })
 err <- function(..., sep=" ") {
