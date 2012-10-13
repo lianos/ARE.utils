@@ -1,7 +1,13 @@
 #!/usr/bin/env Rscript
+
 usage <- "rmd2html [OPTIONS] INFILE.Rmd [OUTBASE]
 
-  Converts Rmarkdown file INFILE to OUTBASE.md then OUTBSAE.html"
+  Converts Rmarkdown file INFILE to OUTBASE.md then OUTBSAE.html
+
+  R packages required:
+    * optparse
+    * knitr
+    * markdown"
 
 options(encoding='UTF-8', error=function(err) {
   cat("\n\nAn error happened you didn't account for, exiting ...\n")
@@ -13,7 +19,14 @@ err <- function(..., sep=" ") {
   cat("ERROR:", msg, "\n")
   quit(save='no', status=1)
 }
-suppressPackageStartupMessages(if (!require(optparse)) err('optparse required'))
+
+libs.reqd <- c('optparse', 'knitr', 'markdown')
+libs.missing <- setdiff(libs.reqd, unlist(sapply(.libPaths(), dir)))
+if (any(libs.missing)) {
+  err("Required packages missing:", paste(libs.missing, sep=", "))
+}
+
+suppressPackageStartupMessages(library(optparse))
 
 opt.list <- list(
   make_option(c('-f', '--force'), default=FALSE, action='store_true',
@@ -58,8 +71,8 @@ if (any(file.exists(c(out.md, out.html))) && !opts$force) {
 ## ----------------------------------------------------------------------------
 ## Getting down to business
 suppressPackageStartupMessages({
-  if (!require('knitr')) err("knitr required")
-  if (!require('markdown')) err("markdown required")
+  library(knitr)
+  library(markdown)
 })
 
 md.opts <- setdiff(markdownHTMLOptions(TRUE), 'hard_wrap')
