@@ -1,6 +1,10 @@
 ## Wrapper for functions for doing gene ontology enrichment tests using
 ## GOstats
+library(AnnotationDbi)
+library(annotate)
 library(GOstats)
+library(xtable)
+
 ##
 ## Help with GO in R:
 ##   http://www.economia.unimi.it/projects/marray/2007/material/day4/Lecture7.pdf
@@ -22,7 +26,7 @@ do.goReport <- function(genes, universe, ontologies=c('BP', 'MF', 'CC'),
                         report.name="GO-report.html", verbose=FALSE) {
   genes <- unique(as.character(genes))
   universe <- union(genes, as.character(universe))
-  
+
   gos <- lapply(ontologies, function(ontology) {
     if (verbose) {
       cat("...", ontology, "\n")
@@ -32,11 +36,11 @@ do.goReport <- function(genes, universe, ontologies=c('BP', 'MF', 'CC'),
                testDirection=testDirection)
   })
   names(gos) <- ontologies
-  
+
   if (length(grep("\\.html?$", report.name)) == 0L) {
     report.name <- paste(report.name, 'html', sep='.')
   }
-  
+
   html.out <- file.path(path, report.name)
   if (verbose) {
     cat("Creating HTML report to:", html.out, "\n")
@@ -58,7 +62,7 @@ do.goReport <- function(genes, universe, ontologies=c('BP', 'MF', 'CC'),
 ##' id's for everything except yeast -- in which case, use ORFs
 ##' @param universe A list of genes that could have been picked.
 do.gostats <- function(genes, universe, conditional=TRUE, p.value=0.05,
-                       ontology=c('BP', 'MF', 'CC'), annotation='org.Sc.sgd',
+                       ontology=c('BP', 'MF', 'CC'), annotation='org.Hs.eg.db',
                        testDirection='over') {
   if (!require(GOstats)) {
     stop("This function requires GOstats")
@@ -124,7 +128,9 @@ go.members <- function(result, p.value=pvalueCutoff(result), categorySize=NULL,
   }
 
   df <- lapply(sig.in.go, function(x) {
-    symbols <- mget(x, name.map, ifnotfound=NA)
+    # f <- selectMethod("mget", c("character", "AnnDbBimap"));
+    # symbols <- f(x, name.map, ifnotfound=NA)
+    symbols <- AnnotationDbi::mget(x, name.map, ifnotfound=NA)
     symbols <- sapply(symbols, '[', 1)
     symbols[is.na(symbols)] <- names(symbols)[is.na(symbols)]
     d.f <- data.frame(id=x, symbol=symbols)
