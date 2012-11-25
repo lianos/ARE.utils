@@ -7,5 +7,7 @@ Description: A convenient place to store my utility functions across projects.
     Some code isn't mine and are snippets I've found on the web.
 License: BSD (unless otherwise noted)
 URL: http://github.com/lianos/ARE.utils
+Depends: data.table
+Imports: data.table
 LazyLoad: yes
 Date: 2009-11-14
