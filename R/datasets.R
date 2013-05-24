@@ -1,4 +1,4 @@
-trim.data <- function(x, qtile=0.01, trim.to=c("NA", "quantile", "remove"),
+trim.data <- function(x, qtile=0.01, trim.to=c("quantile", "NA", "remove"),
                       side=c('both', 'upper', 'lower')) {
   trim.to <- match.arg(trim.to)
   side <- match.arg(side)
