@@ -29,7 +29,8 @@ create.densities <- function(..., along=1, density.params=list(), na.rm=TRUE,
   along <- match.dim(along)
   stopifnot(along %in% c(1,2))
   dens.fun <- match.arg(dens.fun)
-  dfun <- getFunction(dens.fun)
+  #dfun <- getFunction(dens.fun, generic=FALSE)
+  dfun <- match.fun(dens.fun)
   if (is.null(density.params$na.rm) && dens.fun == 'density') {
     density.params$na.rm <- na.rm
   }
@@ -50,7 +51,8 @@ create.densities <- function(..., along=1, density.params=list(), na.rm=TRUE,
         ans <- item
       } else {
         if (length(item) < 2) {
-          warning("Trying to create a density out of < 2 items")
+          warning("Trying to create a density out of < 2 items",
+                  immediate.=TRUE)
           ans <- NULL
         } else {
           if (dens.fun == 'ecdf') {
@@ -69,7 +71,7 @@ create.densities <- function(..., along=1, density.params=list(), na.rm=TRUE,
       if (dens.fun == 'ecdf') {
         ans <- ecdf(data[idx,])
       } else {
-        ans <- do.call(density, c(x=data[idx,], density.params))
+        ans <- do.call(density, c(x=list(data[idx,]), density.params))
       }
     })
   }
